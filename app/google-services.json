@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "301141009732",
+    "project_id": "encontradou",
+    "storage_bucket": "encontradou.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:301141009732:android:df1e2dcba59ed1b543a311",
+        "android_client_info": {
+          "package_name": "com.leydymacareo.encontrandou"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPI-dNlarjWs5SSa6J5I3Jf5X3O1RWYrs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
