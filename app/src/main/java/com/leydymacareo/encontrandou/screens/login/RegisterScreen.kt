@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.login
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,18 +14,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.leydymacareo.encontrandou.NavRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    onBack: () -> Unit = {},
-    onNext: () -> Unit = {}
+    navController: NavController,
+    onBack: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+
+    val scrollState = rememberScrollState()
     var selectedRole by remember { mutableStateOf("usuario") }
+
+    var nombre by remember { mutableStateOf("") }
+    var apellido by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var codigoEncargado by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -38,8 +58,6 @@ fun RegisterScreen(
             )
         }
     ) { innerPadding ->
-        val scrollState = rememberScrollState()
-
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -67,15 +85,19 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            RegistroCampo("Nombre", Icons.Default.Person)
+            RegistroCampo("Nombre", Icons.Default.Person, nombre) { nombre = it }
             Spacer(modifier = Modifier.height(24.dp))
-            RegistroCampo("Apellido", Icons.Default.Person)
+
+            RegistroCampo("Apellido", Icons.Default.Person, apellido) { apellido = it }
             Spacer(modifier = Modifier.height(24.dp))
-            RegistroCampo("Correo Electrónico", Icons.Default.Email)
+
+            RegistroCampo("Correo Electrónico", Icons.Default.Email, email) { email = it }
             Spacer(modifier = Modifier.height(24.dp))
-            RegistroCampo("Contraseña", Icons.Default.Lock)
+
+            RegistroCampo("Contraseña", Icons.Default.Lock, password, true) { password = it }
             Spacer(modifier = Modifier.height(24.dp))
-            RegistroCampo("Confirmar Contraseña", Icons.Default.Lock)
+
+            RegistroCampo("Confirmar Contraseña", Icons.Default.Lock, confirmPassword, true) { confirmPassword = it }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -113,13 +135,53 @@ fun RegisterScreen(
 
             if (selectedRole == "encargado") {
                 Spacer(modifier = Modifier.height(16.dp))
-                RegistroCampo("Código (Solo para Encargados)", Icons.Default.Lock)
+                RegistroCampo("Código (Solo para Encargados)", Icons.Default.Lock, codigoEncargado) { codigoEncargado = it }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = onNext,
+                onClick = {
+                    if (
+                        nombre.isBlank() || apellido.isBlank() || email.isBlank() || password.isBlank()
+                        || confirmPassword.isBlank()
+                        || (selectedRole == "encargado" && codigoEncargado != "MOVILES2025-1")
+                    ) {
+                        Toast.makeText(context, "Por favor completa los campos correctamente", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    if (password != confirmPassword) {
+                        Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    isLoading = true
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val userId = auth.currentUser?.uid ?: ""
+                                val userMap = hashMapOf(
+                                    "nombre" to "$nombre $apellido",
+                                    "email" to email,
+                                    "rol" to selectedRole
+                                )
+                                db.collection("usuarios").document(userId)
+                                    .set(userMap)
+                                    .addOnSuccessListener {
+                                        isLoading = false
+                                        navController.navigate(NavRoutes.AccountCreated)
+                                    }
+                                    .addOnFailureListener {
+                                        isLoading = false
+                                        Toast.makeText(context, "Error al guardar datos", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                isLoading = false
+                                Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -127,7 +189,7 @@ fun RegisterScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1))
             ) {
                 Text(
-                    text = "Registrarse",
+                    text = if (isLoading) "Registrando..." else "Registrarse",
                     fontSize = 18.sp,
                     color = Color.Black,
                     fontWeight = FontWeight.Bold
@@ -141,10 +203,16 @@ fun RegisterScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistroCampo(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun RegistroCampo(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    value: String,
+    isPassword: Boolean = false,
+    onChange: (String) -> Unit
+) {
     OutlinedTextField(
-        value = "",
-        onValueChange = {},
+        value = value,
+        onValueChange = onChange,
         modifier = Modifier.fillMaxWidth(),
         trailingIcon = {
             Icon(
@@ -163,15 +231,10 @@ fun RegistroCampo(label: String, icon: androidx.compose.ui.graphics.vector.Image
             )
         },
         shape = RoundedCornerShape(12.dp),
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             containerColor = Color(0xFFBFEBFB),
             unfocusedBorderColor = Color(0xFF80D7F8)
         )
     )
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun RegisterScreenPreview() {
-    //RegisterScreen()
 }

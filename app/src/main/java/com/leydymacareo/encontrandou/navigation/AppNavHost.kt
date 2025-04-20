@@ -6,44 +6,53 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.screens.login.*
+import com.leydymacareo.encontrandou.screens.user.HomeScreen
 
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = NavRoutes.Welcome) {
+
         composable(NavRoutes.Welcome) {
             WelcomeScreen(
                 onLoginClick = { navController.navigate(NavRoutes.Login) },
                 onRegisterClick = { navController.navigate(NavRoutes.Register) }
             )
         }
-        composable(NavRoutes.Login) {
-            LoginSreen(
-                onLoginSuccess = { navController.navigate(NavRoutes.Verification) },
+
+        composable(NavRoutes.Register) {
+            RegisterScreen(
+                navController = navController,
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(NavRoutes.Register) {
-            RegisterScreen(
-                onBack = { navController.popBackStack() },
-                onNext = { navController.navigate(NavRoutes.Verification) }
+
+
+        composable(NavRoutes.AccountCreated) {
+            AccountCreatedScreen(navController)
+        }
+
+        composable(NavRoutes.Login) {
+            LoginSreen(
+                navController = navController,
+                onBack = { navController.popBackStack() }
             )
         }
-        composable(NavRoutes.Verification) {
+
+        composable(NavRoutes.VerifyEmail) {
             VerificationScreen(
                 onBack = { navController.popBackStack() },
-                onVerified = { navController.navigate(NavRoutes.AccountCreated) }
-            )
-        }
-        composable(NavRoutes.AccountCreated) {
-            AccountCreatedScreen(
-                onGoHome = {
-                    navController.navigate(NavRoutes.Welcome) {
-                        popUpTo(0) // limpia el backstack completo
+                onVerified = {
+                    navController.navigate(NavRoutes.Home) {
+                        popUpTo(NavRoutes.Login) { inclusive = true }
                     }
                 }
             )
+        }
+
+        composable(NavRoutes.Home) {
+            HomeScreen()
         }
     }
 }

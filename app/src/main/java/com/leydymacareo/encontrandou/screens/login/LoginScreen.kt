@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.login
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,23 +9,34 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginSreen(
-    onLoginSuccess: () -> Unit = {},
+    navController: NavController,
     onBack: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -50,6 +62,7 @@ fun LoginSreen(
                 contentDescription = "Logo Unab",
                 modifier = Modifier.size(200.dp)
             )
+
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
@@ -58,11 +71,12 @@ fun LoginSreen(
                 color = Color(0xFFFF9900),
                 fontWeight = FontWeight.Bold
             )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = email,
+                onValueChange = { email = it },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     Icon(
@@ -86,11 +100,12 @@ fun LoginSreen(
                     unfocusedBorderColor = Color(0xFF80D7F8)
                 )
             )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = password,
+                onValueChange = { password = it },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     Icon(
@@ -109,23 +124,49 @@ fun LoginSreen(
                     )
                 },
                 shape = RoundedCornerShape(12.dp),
+                visualTransformation = PasswordVisualTransformation(),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = Color(0xFFBFEBFB),
                     unfocusedBorderColor = Color(0xFF80D7F8)
                 )
             )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = onLoginSuccess,
+                onClick = {
+                    if (email.isBlank() || password.isBlank()) {
+                        Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    isLoading = true
+                    auth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            isLoading = false
+                            if (task.isSuccessful) {
+                                val user = auth.currentUser
+                                if (user != null && user.isEmailVerified) {
+                                    navController.navigate(NavRoutes.Home) {
+                                        popUpTo(NavRoutes.Login) { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate(NavRoutes.VerifyEmail)
+                                }
+                            } else {
+                                Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1)),
+                enabled = !isLoading
             ) {
                 Text(
-                    text = "Iniciar Sesión",
+                    text = if (isLoading) "Iniciando..." else "Iniciar Sesión",
                     fontSize = 18.sp,
                     color = Color.Black,
                     fontWeight = FontWeight.Bold
@@ -135,10 +176,4 @@ fun LoginSreen(
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun LoginScreenPreview() {
-    //LoginSreen()
 }
