@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.login
 
+import com.leydymacareo.encontrandou.utils.traducirErrorFirebase
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginSreen(
@@ -36,6 +39,8 @@ fun LoginSreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var showResetPasswordDialog by remember { mutableStateOf(false) }
+    var recoveryEmail by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -154,7 +159,8 @@ fun LoginSreen(
                                     navController.navigate(NavRoutes.VerifyEmail)
                                 }
                             } else {
-                                Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                val msg = traducirErrorFirebase(context, task.exception?.message)
+                                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                             }
                         }
                 },
@@ -173,7 +179,57 @@ fun LoginSreen(
                 )
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextButton(onClick = { showResetPasswordDialog = true }) {
+                Text("¿Olvidaste tu contraseña?", color = Color(0xFF00AFF1))
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showResetPasswordDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetPasswordDialog = false },
+            title = { Text("Recuperar contraseña") },
+            text = {
+                Column {
+                    Text("Ingresa tu correo para enviarte un enlace de recuperación.")
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = recoveryEmail,
+                        onValueChange = { recoveryEmail = it },
+                        label = { Text("Correo electrónico") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (recoveryEmail.isNotBlank()) {
+                        FirebaseAuth.getInstance()
+                            .sendPasswordResetEmail(recoveryEmail)
+                            .addOnSuccessListener {
+                                Toast.makeText(context, "Correo enviado", Toast.LENGTH_SHORT).show()
+                                showResetPasswordDialog = false
+                                recoveryEmail = ""
+                            }
+                            .addOnFailureListener {
+                                val msg = traducirErrorFirebase(context, it.message)
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                }) {
+                    Text("Enviar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetPasswordDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }

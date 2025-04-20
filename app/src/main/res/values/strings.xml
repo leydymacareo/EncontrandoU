@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">EncontrandoU</string>
+    <string name="error_password_invalid">La contraseña es incorrecta</string>
+    <string name="error_user_not_found">Este correo no está registrado</string>
+    <string name="error_email_bad_format">El correo electrónico no tiene un formato válido</string>
+    <string name="error_network">Sin conexión a internet</string>
+    <string name="error_too_many_requests">Demasiados intentos. Intenta más tarde</string>
+    <string name="error_unknown">Ocurrió un error desconocido</string>
+    <string name="error_email_already_in_use">Ya existe una cuenta con este correo</string>
+    <string name="error_weak_password">La contraseña es muy débil. Usa al menos 6 caracteres</string>
+    <string name="error_operation_not_allowed">El registro está deshabilitado. Contacta al soporte</string>
+
 </resources>

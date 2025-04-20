@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.login
 
+import com.leydymacareo.encontrandou.utils.traducirErrorFirebase
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,7 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.leydymacareo.encontrandou.NavRoutes
+import com.leydymacareo.encontrandou.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,7 +180,8 @@ fun RegisterScreen(
                                     }
                             } else {
                                 isLoading = false
-                                Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                val msg = traducirErrorFirebase(context, task.exception?.message)
+                                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                             }
                         }
                 },
