@@ -10,6 +10,7 @@ navigationCompose = "2.8.9"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+playServicesCast = "22.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,6 +37,7 @@ firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx"
 firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+play-services-cast = { group = "com.google.android.gms", name = "play-services-cast", version.ref = "playServicesCast" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

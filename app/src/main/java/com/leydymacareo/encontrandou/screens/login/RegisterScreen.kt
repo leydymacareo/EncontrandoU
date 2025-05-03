@@ -30,11 +30,13 @@ import com.leydymacareo.encontrandou.utils.validarConfirmacion
 import com.leydymacareo.encontrandou.utils.validarContrasena
 import com.leydymacareo.encontrandou.utils.validarCorreo
 import com.leydymacareo.encontrandou.utils.validarNombre
+import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     navController: NavController,
+    sessionViewModel: SessionViewModel,
     onBack: () -> Unit = {}
 ) {
     val context = LocalContext.current

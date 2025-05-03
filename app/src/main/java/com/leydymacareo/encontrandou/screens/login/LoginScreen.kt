@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.login
 
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,11 +24,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
+import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavController,
+    sessionViewModel: SessionViewModel,
     onBack: () -> Unit = {}
 ) {
     val auth = FirebaseAuth.getInstance()
@@ -95,7 +98,6 @@ fun LoginScreen(
                     containerColor = Color(0xFFBFEBFB),
                     unfocusedBorderColor = Color(0xFF80D7F8),
                     focusedBorderColor = Color(0xFF00AFF1)
-
                 )
             )
 
@@ -121,7 +123,6 @@ fun LoginScreen(
                     containerColor = Color(0xFFBFEBFB),
                     unfocusedBorderColor = Color(0xFF80D7F8),
                     focusedBorderColor = Color(0xFF00AFF1)
-
                 )
             )
 
@@ -145,7 +146,6 @@ fun LoginScreen(
 
                     isLoading = true
 
-                    // Verificamos en Firestore si el correo existe
                     db.collection("usuarios")
                         .whereEqualTo("email", email)
                         .get()
@@ -154,11 +154,18 @@ fun LoginScreen(
                                 isLoading = false
                                 emailError = "Correo no registrado"
                             } else {
+                                val role = result.documents[0].getString("rol") ?: ""
                                 auth.signInWithEmailAndPassword(email, password)
                                     .addOnCompleteListener { task ->
                                         isLoading = false
                                         if (task.isSuccessful) {
-                                            navController.navigate(NavRoutes.Home) {
+                                            sessionViewModel.setUserSession(role)
+                                            val targetRoute = when (role) {
+                                                "usuario" -> NavRoutes.UserHome
+                                                "encargado" -> NavRoutes.EncargadoHome
+                                                else -> NavRoutes.UserHome
+                                            }
+                                            navController.navigate(targetRoute) {
                                                 popUpTo(NavRoutes.Login) { inclusive = true }
                                             }
                                         } else {
