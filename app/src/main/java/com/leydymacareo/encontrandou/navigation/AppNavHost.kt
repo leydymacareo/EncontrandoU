@@ -28,26 +28,14 @@ fun AppNavHost() {
             )
         }
 
-
         composable(NavRoutes.AccountCreated) {
             AccountCreatedScreen(navController)
         }
 
         composable(NavRoutes.Login) {
-            LoginSreen(
+            LoginScreen(
                 navController = navController,
                 onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable(NavRoutes.VerifyEmail) {
-            VerificationScreen(
-                onBack = { navController.popBackStack() },
-                onVerified = {
-                    navController.navigate(NavRoutes.Home) {
-                        popUpTo(NavRoutes.Login) { inclusive = true }
-                    }
-                }
             )
         }
 

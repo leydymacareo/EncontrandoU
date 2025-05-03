@@ -1,7 +1,5 @@
 package com.leydymacareo.encontrandou.screens.login
 
-import com.leydymacareo.encontrandou.utils.traducirErrorFirebase
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,25 +20,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginSreen(
+fun LoginScreen(
     navController: NavController,
     onBack: () -> Unit = {}
 ) {
-    val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
-    var showResetPasswordDialog by remember { mutableStateOf(false) }
-    var recoveryEmail by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -81,28 +78,24 @@ fun LoginSreen(
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Email,
-                        contentDescription = "Email",
-                        tint = Color.Black,
-                        modifier = Modifier.padding(end = 20.dp)
-                    )
+                onValueChange = {
+                    email = it
+                    emailError = ""
                 },
-                label = {
-                    Text(
-                        text = "Correo Electrónico",
-                        color = Color.Black,
-                        modifier = Modifier.padding(start = 8.dp),
-                        fontSize = 18.sp
-                    )
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Correo Electrónico") },
+                leadingIcon = {
+                    Icon(Icons.Default.Email, contentDescription = "Email", tint = Color.Black)
+                },
+                supportingText = {
+                    if (emailError.isNotEmpty()) Text(emailError, color = Color.Red)
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = Color(0xFFBFEBFB),
-                    unfocusedBorderColor = Color(0xFF80D7F8)
+                    unfocusedBorderColor = Color(0xFF80D7F8),
+                    focusedBorderColor = Color(0xFF00AFF1)
+
                 )
             )
 
@@ -110,29 +103,25 @@ fun LoginSreen(
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = {
+                    password = it
+                    passwordError = ""
+                },
                 modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Contraseña",
-                        tint = Color.Black,
-                        modifier = Modifier.padding(end = 20.dp)
-                    )
+                label = { Text("Contraseña") },
+                leadingIcon = {
+                    Icon(Icons.Default.Lock, contentDescription = "Contraseña", tint = Color.Black)
                 },
-                label = {
-                    Text(
-                        text = "Contraseña",
-                        color = Color.Black,
-                        modifier = Modifier.padding(start = 8.dp),
-                        fontSize = 18.sp
-                    )
+                supportingText = {
+                    if (passwordError.isNotEmpty()) Text(passwordError, color = Color.Red)
                 },
-                shape = RoundedCornerShape(12.dp),
                 visualTransformation = PasswordVisualTransformation(),
+                shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = Color(0xFFBFEBFB),
-                    unfocusedBorderColor = Color(0xFF80D7F8)
+                    unfocusedBorderColor = Color(0xFF80D7F8),
+                    focusedBorderColor = Color(0xFF00AFF1)
+
                 )
             )
 
@@ -140,28 +129,47 @@ fun LoginSreen(
 
             Button(
                 onClick = {
+                    emailError = ""
+                    passwordError = ""
+
+                    if (!email.endsWith("@unab.edu.co")) {
+                        emailError = "Solo se permite correo @unab.edu.co"
+                        return@Button
+                    }
+
                     if (email.isBlank() || password.isBlank()) {
-                        Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                        if (email.isBlank()) emailError = "Campo requerido"
+                        if (password.isBlank()) passwordError = "Campo requerido"
                         return@Button
                     }
 
                     isLoading = true
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            isLoading = false
-                            if (task.isSuccessful) {
-                                val user = auth.currentUser
-                                if (user != null && user.isEmailVerified) {
-                                    navController.navigate(NavRoutes.Home) {
-                                        popUpTo(NavRoutes.Login) { inclusive = true }
-                                    }
-                                } else {
-                                    navController.navigate(NavRoutes.VerifyEmail)
-                                }
+
+                    // Verificamos en Firestore si el correo existe
+                    db.collection("usuarios")
+                        .whereEqualTo("email", email)
+                        .get()
+                        .addOnSuccessListener { result ->
+                            if (result.isEmpty) {
+                                isLoading = false
+                                emailError = "Correo no registrado"
                             } else {
-                                val msg = traducirErrorFirebase(context, task.exception?.message)
-                                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                                auth.signInWithEmailAndPassword(email, password)
+                                    .addOnCompleteListener { task ->
+                                        isLoading = false
+                                        if (task.isSuccessful) {
+                                            navController.navigate(NavRoutes.Home) {
+                                                popUpTo(NavRoutes.Login) { inclusive = true }
+                                            }
+                                        } else {
+                                            passwordError = "Contraseña incorrecta"
+                                        }
+                                    }
                             }
+                        }
+                        .addOnFailureListener {
+                            isLoading = false
+                            emailError = "Error al validar el correo"
                         }
                 },
                 modifier = Modifier
@@ -179,57 +187,7 @@ fun LoginSreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextButton(onClick = { showResetPasswordDialog = true }) {
-                Text("¿Olvidaste tu contraseña?", color = Color(0xFF00AFF1))
-            }
-
             Spacer(modifier = Modifier.height(24.dp))
         }
-    }
-
-    if (showResetPasswordDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetPasswordDialog = false },
-            title = { Text("Recuperar contraseña") },
-            text = {
-                Column {
-                    Text("Ingresa tu correo para enviarte un enlace de recuperación.")
-                    Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = recoveryEmail,
-                        onValueChange = { recoveryEmail = it },
-                        label = { Text("Correo electrónico") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (recoveryEmail.isNotBlank()) {
-                        FirebaseAuth.getInstance()
-                            .sendPasswordResetEmail(recoveryEmail)
-                            .addOnSuccessListener {
-                                Toast.makeText(context, "Correo enviado", Toast.LENGTH_SHORT).show()
-                                showResetPasswordDialog = false
-                                recoveryEmail = ""
-                            }
-                            .addOnFailureListener {
-                                val msg = traducirErrorFirebase(context, it.message)
-                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                            }
-                    }
-                }) {
-                    Text("Enviar")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showResetPasswordDialog = false }) {
-                    Text("Cancelar")
-                }
-            }
-        )
     }
 }

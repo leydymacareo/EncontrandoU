@@ -1,19 +1,33 @@
-package com.leydymacareo.encontrandou.utils
+package com.leydymacareo.encontrandou.user.utils
 
 import android.content.Context
-import com.leydymacareo.encontrandou.R
 
-fun traducirErrorFirebase(context: Context, error: String?): String {
+fun traducirErrorFirebase(context: Context, mensaje: String?): String {
     return when {
-        error == null -> context.getString(R.string.error_unknown)
-        "password is invalid" in error.lowercase() -> context.getString(R.string.error_password_invalid)
-        "no user record" in error.lowercase() || "no user found" in error.lowercase() -> context.getString(R.string.error_user_not_found)
-        "email address is badly formatted" in error.lowercase() -> context.getString(R.string.error_email_bad_format)
-        "email already in use" in error.lowercase() -> context.getString(R.string.error_email_already_in_use)
-        "weak password" in error.lowercase() -> context.getString(R.string.error_weak_password)
-        "operation not allowed" in error.lowercase() -> context.getString(R.string.error_operation_not_allowed)
-        "network error" in error.lowercase() -> context.getString(R.string.error_network)
-        "too many requests" in error.lowercase() -> context.getString(R.string.error_too_many_requests)
-        else -> error
+        mensaje == null -> "Ocurrió un error desconocido"
+
+        // Registro
+        mensaje.contains("email address is already in use", ignoreCase = true) ->
+            "Este correo ya está registrado"
+        mensaje.contains("The given password is invalid", ignoreCase = true) ->
+            "La contraseña no cumple con los requisitos"
+        mensaje.contains("badly formatted", ignoreCase = true) ->
+            "El correo no tiene un formato válido"
+
+        // Login
+        mensaje.contains("There is no user record", ignoreCase = true) ->
+            "Este correo no está registrado"
+        mensaje.contains("The password is invalid", ignoreCase = true) ->
+            "Contraseña incorrecta"
+        mensaje.contains("user account has been disabled", ignoreCase = true) ->
+            "Tu cuenta ha sido deshabilitada. Contacta a soporte"
+
+        // Otros posibles
+        mensaje.contains("network error", ignoreCase = true) ->
+            "Error de red. Verifica tu conexión"
+        mensaje.contains("too many requests", ignoreCase = true) ->
+            "Demasiados intentos fallidos. Intenta más tarde"
+
+        else -> "Error: ${mensaje.trim()}"
     }
 }

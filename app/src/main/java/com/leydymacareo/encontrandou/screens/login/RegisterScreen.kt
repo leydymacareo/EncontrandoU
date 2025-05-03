@@ -1,6 +1,5 @@
 package com.leydymacareo.encontrandou.screens.login
 
-import com.leydymacareo.encontrandou.utils.traducirErrorFirebase
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -26,6 +25,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
+import com.leydymacareo.encontrandou.utils.validarCodigoEncargado
+import com.leydymacareo.encontrandou.utils.validarConfirmacion
+import com.leydymacareo.encontrandou.utils.validarContrasena
+import com.leydymacareo.encontrandou.utils.validarCorreo
+import com.leydymacareo.encontrandou.utils.validarNombre
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +50,15 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var codigoEncargado by remember { mutableStateOf("") }
+
+    var errorNombre by remember { mutableStateOf("") }
+    var errorApellido by remember { mutableStateOf("") }
+    var errorEmail by remember { mutableStateOf("") }
+    var errorPassword by remember { mutableStateOf("") }
+    var errorConfirm by remember { mutableStateOf("") }
+    var errorCodigo by remember { mutableStateOf("") }
+    var errorGeneral by remember { mutableStateOf("") }
+
     var isLoading by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -87,34 +100,23 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            RegistroCampo("Nombre", Icons.Default.Person, nombre) { nombre = it }
-            Spacer(modifier = Modifier.height(24.dp))
-
-            RegistroCampo("Apellido", Icons.Default.Person, apellido) { apellido = it }
-            Spacer(modifier = Modifier.height(24.dp))
-
-            RegistroCampo("Correo Electrónico", Icons.Default.Email, email) { email = it }
-            Spacer(modifier = Modifier.height(24.dp))
-
-            RegistroCampo("Contraseña", Icons.Default.Lock, password, true) { password = it }
-            Spacer(modifier = Modifier.height(24.dp))
-
-            RegistroCampo("Confirmar Contraseña", Icons.Default.Lock, confirmPassword, true) { confirmPassword = it }
-
-            Spacer(modifier = Modifier.height(24.dp))
+            RegistroCampo("Nombre", Icons.Default.Person, nombre, errorNombre) { nombre = it }
+            RegistroCampo("Apellido", Icons.Default.Person, apellido, errorApellido) { apellido = it }
+            RegistroCampo("Correo Electrónico", Icons.Default.Email, email, errorEmail) { email = it }
+            RegistroCampo("Contraseña", Icons.Default.Lock, password, errorPassword, true) { password = it }
+            RegistroCampo("Confirmar Contraseña", Icons.Default.Lock, confirmPassword, errorConfirm, true) { confirmPassword = it }
 
             Text(
                 text = "Rol",
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 4.dp)
+                    .padding(top = 16.dp, start = 4.dp)
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start) {
                 RadioButton(
                     selected = selectedRole == "usuario",
                     onClick = { selectedRole = "usuario" },
@@ -123,10 +125,9 @@ fun RegisterScreen(
                 Text("Usuario")
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start) {
                 RadioButton(
                     selected = selectedRole == "encargado",
                     onClick = { selectedRole = "encargado" },
@@ -136,54 +137,64 @@ fun RegisterScreen(
             }
 
             if (selectedRole == "encargado") {
-                Spacer(modifier = Modifier.height(16.dp))
-                RegistroCampo("Código (Solo para Encargados)", Icons.Default.Lock, codigoEncargado) { codigoEncargado = it }
+                RegistroCampo(
+                    label = "Código (Solo para Encargados)",
+                    icon = Icons.Default.Lock,
+                    value = codigoEncargado,
+                    errorText = errorCodigo
+                ) { codigoEncargado = it }
+            }
+
+            if (errorGeneral.isNotEmpty()) {
+                Text(errorGeneral, color = Color.Red, modifier = Modifier.padding(top = 8.dp))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-                    if (
-                        nombre.isBlank() || apellido.isBlank() || email.isBlank() || password.isBlank()
-                        || confirmPassword.isBlank()
-                        || (selectedRole == "encargado" && codigoEncargado != "MOVILES2025-1")
-                    ) {
-                        Toast.makeText(context, "Por favor completa los campos correctamente", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
+                    val (okNombre, msgNombre) = validarNombre(nombre)
+                    val (okApellido, msgApellido) = validarNombre(apellido)
+                    val (okCorreo, msgCorreo) = validarCorreo(email)
+                    val (okPass, msgPass) = validarContrasena(password)
+                    val (okConfirm, msgConfirm) = validarConfirmacion(password, confirmPassword)
+                    val (okCodigo, msgCodigo) = if (selectedRole == "encargado") validarCodigoEncargado(codigoEncargado) else true to ""
 
-                    if (password != confirmPassword) {
-                        Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
+                    errorNombre = msgNombre
+                    errorApellido = msgApellido
+                    errorEmail = msgCorreo
+                    errorPassword = msgPass
+                    errorConfirm = msgConfirm
+                    errorCodigo = msgCodigo
 
-                    isLoading = true
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val userId = auth.currentUser?.uid ?: ""
-                                val userMap = hashMapOf(
-                                    "nombre" to "$nombre $apellido",
-                                    "email" to email,
-                                    "rol" to selectedRole
-                                )
-                                db.collection("usuarios").document(userId)
-                                    .set(userMap)
-                                    .addOnSuccessListener {
-                                        isLoading = false
-                                        navController.navigate(NavRoutes.AccountCreated)
-                                    }
-                                    .addOnFailureListener {
-                                        isLoading = false
-                                        Toast.makeText(context, "Error al guardar datos", Toast.LENGTH_SHORT).show()
-                                    }
-                            } else {
-                                isLoading = false
-                                val msg = traducirErrorFirebase(context, task.exception?.message)
-                                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                    if (okNombre && okApellido && okCorreo && okPass && okConfirm && okCodigo) {
+                        isLoading = true
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val uid = auth.currentUser?.uid ?: ""
+                                    val userData = mapOf(
+                                        "nombre" to "$nombre $apellido",
+                                        "email" to email,
+                                        "rol" to selectedRole
+                                    )
+                                    db.collection("usuarios").document(uid).set(userData)
+                                        .addOnSuccessListener {
+                                            isLoading = false
+                                            navController.navigate(NavRoutes.AccountCreated)
+                                        }
+                                        .addOnFailureListener {
+                                            isLoading = false
+                                            errorGeneral = "Error al guardar los datos."
+                                        }
+                                } else {
+                                    isLoading = false
+                                    errorGeneral = task.exception?.localizedMessage ?: "Error desconocido"
+                                }
                             }
-                        }
+                    } else {
+                        errorGeneral = "Corrige los errores para continuar"
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -210,34 +221,49 @@ fun RegistroCampo(
     label: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     value: String,
+    errorText: String = "",
     isPassword: Boolean = false,
     onChange: (String) -> Unit
 ) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onChange,
-        modifier = Modifier.fillMaxWidth(),
-        trailingIcon = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color.Black,
-                modifier = Modifier.padding(end = 20.dp)
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            trailingIcon = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier.padding(end = 20.dp)
+                )
+            },
+            label = {
+                Text(
+                    text = label,
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 8.dp),
+                    fontSize = 18.sp
+                )
+            },
+            shape = RoundedCornerShape(12.dp),
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = Color(0xFFBFEBFB),
+                unfocusedBorderColor = Color(0xFF80D7F8),
+                focusedBorderColor = Color(0xFF00AFF1)
             )
-        },
-        label = {
-            Text(
-                text = label,
-                color = Color.Black,
-                modifier = Modifier.padding(start = 8.dp),
-                fontSize = 18.sp
-            )
-        },
-        shape = RoundedCornerShape(12.dp),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            containerColor = Color(0xFFBFEBFB),
-            unfocusedBorderColor = Color(0xFF80D7F8)
         )
-    )
+
+        if (errorText.isNotEmpty()) {
+            Text(
+                text = errorText,
+                color = Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
+            )
+        }
+    }
 }
