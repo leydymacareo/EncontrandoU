@@ -53,7 +53,7 @@ fun WelcomeScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1))
             ) {
-                Text("Iniciar Sesión", fontSize = 18.sp, color = Color.Black)
+                Text("Iniciar Sesión", fontSize = 18.sp, color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

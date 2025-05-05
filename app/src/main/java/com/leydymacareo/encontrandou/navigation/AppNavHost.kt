@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.screens.staff.EncargadoHomeScreen
-import com.leydymacareo.encontrandou.screens.home.HomeScreen
+import com.leydymacareo.encontrandou.screens.home.HomeScreenUsuario
 import com.leydymacareo.encontrandou.screens.login.*
 import com.leydymacareo.encontrandou.viewmodel.SessionState
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
@@ -62,7 +62,7 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                     }
                 }
                 is SessionState.LoggedIn -> {
-                    HomeScreen()
+                    HomeScreenUsuario()
                 }
             }
         }

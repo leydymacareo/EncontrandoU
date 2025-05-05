@@ -2,6 +2,7 @@ package com.leydymacareo.encontrandou.screens.login
 
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -85,7 +86,8 @@ fun LoginScreen(
                     email = it
                     emailError = ""
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 label = { Text("Correo Electrónico") },
                 leadingIcon = {
                     Icon(Icons.Default.Email, contentDescription = "Email", tint = Color.Black)
@@ -95,11 +97,12 @@ fun LoginScreen(
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color(0xFFBFEBFB),
+                    containerColor = Color.White,
                     unfocusedBorderColor = Color(0xFF80D7F8),
-                    focusedBorderColor = Color(0xFF00AFF1)
+                    focusedBorderColor = Color(0xFF80D7F8),
                 )
             )
+
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -120,7 +123,7 @@ fun LoginScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color(0xFFBFEBFB),
+                    containerColor = Color.White,
                     unfocusedBorderColor = Color(0xFF80D7F8),
                     focusedBorderColor = Color(0xFF00AFF1)
                 )
@@ -189,7 +192,7 @@ fun LoginScreen(
                 Text(
                     text = if (isLoading) "Iniciando..." else "Iniciar Sesión",
                     fontSize = 18.sp,
-                    color = Color.Black,
+                    color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             }

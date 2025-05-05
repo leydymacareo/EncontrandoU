@@ -207,7 +207,7 @@ fun RegisterScreen(
                 Text(
                     text = if (isLoading) "Registrando..." else "Registrarse",
                     fontSize = 18.sp,
-                    color = Color.Black,
+                    color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -253,9 +253,9 @@ fun RegistroCampo(
             shape = RoundedCornerShape(12.dp),
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = Color(0xFFBFEBFB),
+                containerColor = Color.White,
                 unfocusedBorderColor = Color(0xFF80D7F8),
-                focusedBorderColor = Color(0xFF00AFF1)
+                focusedBorderColor = Color(0xFF80D7F8)
             )
         )
 
