@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leydymacareo.encontrandou.R
-import com.leydymacareo.encontrandou.screens.prueba.BottomNavItem
 
 
 @Composable
@@ -54,8 +53,8 @@ fun HomeScreenUsuario() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xFFF5F5F5))
-                    .padding(top = 40.dp, bottom = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(top = 40.dp, bottom = 20.dp, start = 20.dp),
+                horizontalAlignment = Alignment.Start
             ) {
                 Text(
                     "Mis Solicitudes",
@@ -89,9 +88,9 @@ fun HomeScreenUsuario() {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    BottomNavItem("Inicio", Icons.Default.Home, selectedTab) { selectedTab = it }
+                    NavBarItem(icon = painterResource(id = R.drawable.home), label = "Inicio")
                     NavBarItem(icon = painterResource(id = R.drawable.help), label = "Ayuda")
-                    BottomNavItem("Perfil", Icons.Default.Person, selectedTab) { selectedTab = it }
+                    NavBarItem(icon = painterResource(id = R.drawable.person), label = "Perfil")
                 }
             }
         }
@@ -165,7 +164,3 @@ fun NavBarItem(icon: Painter, label: String) {
     }
 }
 
-@Composable
-fun NavBarItem(icon: ImageVector, label: String) {
-    NavBarItem(icon = rememberVectorPainter(image = icon), label = label)
-}
