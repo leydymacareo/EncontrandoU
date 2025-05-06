@@ -1,6 +1,7 @@
 package com.leydymacareo.encontrandou.screens.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -20,11 +21,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 
 
 @Composable
-fun HomeScreenUsuario() {
+fun HomeScreenUsuario(navController: NavController) {
     var selectedTab by remember { mutableStateOf("Inicio") }
 
     val items = listOf(
@@ -88,12 +91,36 @@ fun HomeScreenUsuario() {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    NavBarItem(icon = painterResource(id = R.drawable.home), label = "Inicio")
-                    NavBarItem(icon = painterResource(id = R.drawable.help), label = "Ayuda")
-                    NavBarItem(icon = painterResource(id = R.drawable.person), label = "Perfil")
+                    NavBarItem(
+                        icon = painterResource(id = R.drawable.home),
+                        label = "Inicio",
+                        selectedTab = selectedTab
+                    ) {
+                        selectedTab = "Inicio"
+                        navController.navigate(NavRoutes.UserHome)
+                    }
+
+                    NavBarItem(
+                        icon = painterResource(id = R.drawable.help),
+                        label = "Ayuda",
+                        selectedTab = selectedTab
+                    ) {
+                        selectedTab = "Ayuda"
+                        navController.navigate(NavRoutes.UserHelp)
+                    }
+
+                    NavBarItem(
+                        icon = painterResource(id = R.drawable.person),
+                        label = "Perfil",
+                        selectedTab = selectedTab
+                    ) {
+                        selectedTab = "Perfil"
+                        navController.navigate(NavRoutes.UserProfile)
+                    }
                 }
             }
         }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -156,11 +183,27 @@ fun HomeScreenUsuario() {
 
 
 @Composable
-fun NavBarItem(icon: Painter, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(painter = icon, contentDescription = label, tint = Color.Black)
+fun NavBarItem(
+    icon: Painter,
+    label: String,
+    selectedTab: String,
+    onClick: () -> Unit
+) {
+    val selected = selectedTab == label
+    val color = if (selected) Color(0xFF00AFF1) else Color.DarkGray
+    val textColor = if (selected) Color(0xFF00AFF1) else Color.Black
+    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+
+    Column(
+        modifier = Modifier
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(painter = icon, contentDescription = label, tint = color)
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, fontSize = 12.sp, color = Color.Black)
+        Text(text = label, fontSize = 12.sp, color = textColor, fontWeight = fontWeight)
     }
 }
+
 

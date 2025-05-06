@@ -1,6 +1,8 @@
 // AppNavHost.kt
 package com.leydymacareo.encontrandou.navigation
 
+import HelpScreen
+import ProfileScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,7 +64,7 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                     }
                 }
                 is SessionState.LoggedIn -> {
-                    HomeScreenUsuario()
+                    HomeScreenUsuario(navController)
                 }
             }
         }
@@ -86,5 +88,12 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                 }
             }
         }
+        composable("ayuda_usuario") {
+            HelpScreen(navController) // O como se llame tu pantalla de ayuda
+        }
+        composable("perfil_usuario") {
+            ProfileScreen(navController) // O como se llame tu pantalla de perfil
+        }
+
     }
 }

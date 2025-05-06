@@ -14,6 +14,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,13 +27,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.screens.home.NavBarItem
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navController: NavController) {
+    var selectedTab by remember { mutableStateOf("Inicio") }
+
     Scaffold(
         topBar = {
             Column(
@@ -61,9 +69,36 @@ fun ProfileScreen() {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    NavBarItem(icon = painterResource(id = R.drawable.home), label = "Inicio")
-                    NavBarItem(icon = painterResource(id = R.drawable.help), label = "Ayuda")
-                    NavBarItem(icon = painterResource(id = R.drawable.person), label = "Perfil")
+                    NavBarItem(
+                        icon = painterResource(id = R.drawable.home),
+                        label = "Inicio",
+                        selectedTab = selectedTab,
+                        onClick = {
+                            selectedTab = "Inicio"
+                            navController.navigate(NavRoutes.UserHome)
+                        }
+                    )
+
+                    NavBarItem(
+                        icon = painterResource(id = R.drawable.help),
+                        label = "Ayuda",
+                        selectedTab = selectedTab,
+                        onClick = {
+                            selectedTab = "Ayuda"
+                            navController.navigate(NavRoutes.UserHelp)
+                        }
+                    )
+
+                    NavBarItem(
+                        icon = painterResource(id = R.drawable.person),
+                        label = "Perfil",
+                        selectedTab = selectedTab,
+                        onClick = {
+                            selectedTab = "Perfil"
+                            navController.navigate(NavRoutes.UserProfile)
+                        }
+                    )
+
                 }
             }
         }
@@ -163,12 +198,5 @@ fun EncargadoNavItem(label: String, icon: ImageVector, selectedTab: String, onCl
         Icon(icon, contentDescription = label, tint = color)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = label, fontSize = 12.sp, color = color, fontWeight = fontWeight)
-    }
-}
-@Preview(showBackground = true)
-@Composable
-fun PreviewProfileScreen() {
-    MaterialTheme {
-        ProfileScreen()
     }
 }
