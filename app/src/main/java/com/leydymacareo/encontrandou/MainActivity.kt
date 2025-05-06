@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.leydymacareo.encontrandou.navigation.AppNavHost
+import com.leydymacareo.encontrandou.screens.staff.ConfiguracionEncargadoScreen
 import com.leydymacareo.encontrandou.screens.user.LostFrormScreen
 
 class MainActivity : ComponentActivity() {
