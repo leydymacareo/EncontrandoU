@@ -1,10 +1,12 @@
 package com.leydymacareo.encontrandou.screens.user
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +34,7 @@ fun NuevaSolicitudScreen() {
                 navigationIcon = {
                     IconButton(onClick = { /* Acción de volver */ }) {
                         Icon(
-                            imageVector = Icons.Default.Lock,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Volver"
                         )
                     }
@@ -78,12 +80,18 @@ fun NuevaSolicitudScreen() {
                 OutlinedButton(
                     onClick = { },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFFBFEBFB)),
-                    shape = RoundedCornerShape(12.dp)
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFFF2FBFE)),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFF00AFF1))
                 ) {
-                    Icon(Icons.Default.Lock, contentDescription = "Adjuntar")
+                    Icon(
+                        Icons.Default.Lock,
+                        contentDescription = "Adjuntar",
+                        tint = Color.Gray
+                        )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Adjuntar Foto")
+                    Text("Adjuntar Foto",
+                        color = Color.Gray)
                 }
 
                 Text(
@@ -123,8 +131,8 @@ fun LabeledField(label: String, placeholder: String) {
             placeholder = { Text(placeholder) },
             shape = RoundedCornerShape(12.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = Color(0xFFBFEBFB),
-                unfocusedBorderColor = Color(0xFF80D7F8),
+                containerColor = Color(0xFFF2FBFE),
+                unfocusedBorderColor = Color(0xFF00AFF1),
                 focusedTextColor = Color.Black,
                 unfocusedTextColor = Color.Black,
                 focusedPlaceholderColor = Color.Gray,
@@ -158,8 +166,8 @@ fun LabeledDropdown(label: String, options: List<String>) {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color(0xFFBFEBFB),
-                    unfocusedBorderColor = Color(0xFF80D7F8),
+                    containerColor = Color(0xFFF2FBFE),
+                    unfocusedBorderColor = Color(0xFF00AFF1),
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black,
                     focusedPlaceholderColor = Color.Gray,
