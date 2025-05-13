@@ -42,6 +42,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import android.util.Log;
+import androidx.compose.foundation.interaction.MutableInteractionSource
 
 // Estado del formulario
 data class SolicitudFormState(
@@ -128,7 +129,7 @@ fun NuevaSolicitudScreen() {
                     )
                 }
                 Box(modifier = Modifier.weight(1f)) {
-                    LabeledTimePicker("Hora Aproximada*", formState.hora) {
+                    LabeledTimePickerField("Hora Aproximada*", formState.hora) {
                         formState = formState.copy(hora = it)
                     }
                 }
@@ -241,27 +242,38 @@ fun LabeledDatePickerField(
 
     val formattedDate = selectedDate?.let { convertMillisToDate(it) } ?: ""
 
-    OutlinedTextField(
-        value = formattedDate,
-        onValueChange = { },
-        label = { Text(label) },
-        placeholder = { Text("DD/MM/AAAA") },
-        readOnly = true,
-        trailingIcon = {
-            Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    awaitFirstDown(pass = PointerEventPass.Initial)
-                    val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
-                    if (upEvent != null) {
-                        showModal = true
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(text = label, fontWeight = FontWeight.Medium)
+        Spacer(modifier = Modifier.height(6.dp))
+
+        OutlinedTextField(
+            value = formattedDate,
+            onValueChange = {},
+            readOnly = true,
+            placeholder = { Text("DD/MM/AAAA") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(pass = PointerEventPass.Initial)
+                        val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        if (upEvent != null) {
+                            showModal = true
+                        }
                     }
-                }
-            }
-    )
+                },
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                unfocusedBorderColor = Color(0xFF00AFF1),
+                focusedBorderColor = Color(0xFF00AFF1),
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedPlaceholderColor = Color.Gray,
+                unfocusedPlaceholderColor = Color.Gray
+            )
+        )
+    }
 
     if (showModal) {
         DatePickerModal(
@@ -409,33 +421,20 @@ fun LabeledField(
         )
     }
 }
+@SuppressLint("RememberReturnType")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LabeledTimePicker(
+fun LabeledTimePickerField(
     label: String,
     value: String,
     onTimeSelected: (String) -> Unit
 ) {
-    val context = LocalContext.current
-    val calendar = remember { Calendar.getInstance() }
     var showDialog by remember { mutableStateOf(false) }
-
-    if (showDialog) {
-        TimePickerDialog(
-            context,
-            { _, hourOfDay, minute ->
-                val selectedTime = String.format("%02d:%02d", hourOfDay, minute)
-                onTimeSelected(selectedTime)
-                showDialog = false
-            },
-            calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE),
-            true
-        ).show()
-    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = label, fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.height(6.dp))
+
         OutlinedTextField(
             value = value,
             onValueChange = {},
@@ -443,7 +442,15 @@ fun LabeledTimePicker(
             placeholder = { Text("HH:MM") },
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { showDialog = true },
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(pass = PointerEventPass.Initial)
+                        val up = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        if (up != null) {
+                            showDialog = true
+                        }
+                    }
+                },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
@@ -455,5 +462,71 @@ fun LabeledTimePicker(
                 unfocusedPlaceholderColor = Color.Gray
             )
         )
+    }
+
+    if (showDialog) {
+        DialWithDialogExample(
+            onConfirm = { timeState ->
+                val formatted = "%02d:%02d".format(timeState.hour, timeState.minute)
+                onTimeSelected(formatted)
+                showDialog = false
+            },
+            onDismiss = { showDialog = false }
+        )
+    }
+}
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DialWithDialogExample(
+    onConfirm: (TimePickerState) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val currentTime = Calendar.getInstance()
+
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
+        initialMinute = currentTime.get(Calendar.MINUTE),
+        is24Hour = true,
+    )
+
+    TimePickerDialog(
+        onDismiss = onDismiss,
+        onConfirm = { onConfirm(timePickerState) }
+    ) {
+        TimePicker(state = timePickerState)
+    }
+}
+
+@Composable
+fun TimePickerDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Aceptar")
+            }
+        },
+        text = { content() }
+    )
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PreviewNuevaSolicitudScreen() {
+    MaterialTheme {
+        NuevaSolicitudScreen()
     }
 }
