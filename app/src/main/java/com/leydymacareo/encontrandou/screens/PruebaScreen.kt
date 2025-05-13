@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,19 +22,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.leydymacareo.encontrandou.R
-import com.leydymacareo.encontrandou.screens.home.NavBarItem
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewPruebaScreenV2() {
+fun PreviewPrueba() {
     MaterialTheme {
-        PruebaScreen()
+        Prueba()
     }
 }
 
 @Composable
-fun PruebaScreen() {
-    var selectedTab by remember { mutableStateOf("Inicio") }
+fun Prueba() {
+    var selectedTab by remember { mutableStateOf("Inventario") }
+
+    val items = listOf(
+        Triple("USB Blanca", "1 Febrero 2024", "Disponible"),
+        Triple("Portátil HP", "20 de Febrero 2024", "Disponible"),
+        Triple("Billetera roja", "4 Marzo 2025", "Asignado"),
+        Triple("Bolso Azul", "18 Marzo 2025", "Entregado")
+    )
+
+    val statusColors = mapOf(
+        "Disponible" to Color(0xFFFFA000),
+        "Asignado" to Color(0xFF2E7D32),
+        "Entregado" to Color(0xFF1565C0)
+    )
 
     Scaffold(
         topBar = {
@@ -41,14 +54,41 @@ fun PruebaScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xFFF5F5F5))
-                    .padding(top = 40.dp, bottom = 20.dp),
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    "Mis Solicitudes",
+                    text = "Inventario",
                     style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp, bottom = 20.dp),
+
                 )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.filterlist),
+                            contentDescription = "Filtros"
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Filtros")
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.barchart),
+                            contentDescription = "Estadísticas"
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Estadísticas")
+                    }
+                }
             }
         },
         floatingActionButton = {
@@ -58,7 +98,7 @@ fun PruebaScreen() {
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(8.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Nueva solicitud", tint = Color.White)
+                Icon(Icons.Default.Add, contentDescription = "Agregar", tint = Color.White)
             }
         },
         floatingActionButtonPosition = FabPosition.End,
@@ -76,80 +116,47 @@ fun PruebaScreen() {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    BottomNavItem("Inicio", Icons.Default.Home, selectedTab) { selectedTab = it }
-                    NavBarItem(icon = painterResource(id = R.drawable.help), label = "Ayuda")
-                    BottomNavItem("Perfil", Icons.Default.Person, selectedTab) { selectedTab = it }
+                    EncargadoNavItem("Inventario", painterResource(id = R.drawable.inventory), selectedTab) { selectedTab = it }
+                    EncargadoNavItem("Solicitudes", painterResource(id = R.drawable.list), selectedTab) { selectedTab = it }
+                    EncargadoNavItem("Perfil", painterResource(id = R.drawable.person), selectedTab) { selectedTab = it }
+                    EncargadoNavItem("Ajustes", painterResource(id = R.drawable.settings), selectedTab) { selectedTab = it }
                 }
             }
         }
     ) { innerPadding ->
-
-        val items = listOf(
-            Triple("USB Blanca", "1 Abril 2024", "En Espera"),
-            Triple("Mochila azul", "20 de Febrero 2024", "Aprobada"),
-            Triple("Billetera roja", "1 Noviembre 2023", "Entregada"),
-            Triple("Llaves de carro", "1 Marzo 2024", "Rechazada")
-        )
-
-        val statusIcons = mapOf(
-            "Aprobada" to Icons.Default.ThumbUp,
-            "Entregada" to Icons.Default.Check,
-            "Rechazada" to Icons.Default.Close
-        )
-
-        val statusColors = mapOf(
-            "En Espera" to Color(0xFFFFA000),
-            "Aprobada" to Color(0xFF2E7D32),
-            "Entregada" to Color(0xFF1565C0),
-            "Rechazada" to Color(0xFFD32F2F)
-        )
-
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(Color(0xFFF5F5F5))
-
                 .padding(horizontal = 20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            items.forEach { (nombre, fecha, estado) ->
+            items.forEachIndexed { index, (nombre, fecha, estado) ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
-
                 ) {
                     Row(
-                        modifier = Modifier
-                            .padding(16.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (estado == "En Espera") {
-                            Icon(
-                                painter = painterResource(id = R.drawable.accesstime),
-                                contentDescription = estado,
-                                tint = statusColors[estado] ?: Color.Gray,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = statusIcons[estado] ?: Icons.Default.Info,
-                                contentDescription = estado,
-                                tint = statusColors[estado] ?: Color.Gray,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(Color.LightGray, RoundedCornerShape(8.dp))
+                        )
 
                         Spacer(modifier = Modifier.width(16.dp))
 
                         Column {
                             Text(text = nombre, fontWeight = FontWeight.Bold, color = Color.Black)
-                            Text(text = fecha, color = Color.Black, fontSize = 13.sp)
+                            Text(text = fecha, fontSize = 13.sp, color = Color.Black)
                             Text(
                                 text = estado,
                                 color = statusColors[estado] ?: Color.Gray,
@@ -167,12 +174,7 @@ fun PruebaScreen() {
 }
 
 @Composable
-fun BottomNavItem(
-    label: String,
-    icon: ImageVector,
-    selectedTab: String,
-    onClick: (String) -> Unit
-) {
+fun EncargadoNavItem(label: String, icon: Painter, selectedTab: String, onClick: (String) -> Unit) {
     val selected = label == selectedTab
     val color = Color.Black
     val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
@@ -183,7 +185,7 @@ fun BottomNavItem(
             .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(icon, contentDescription = label, tint = color)
+        Icon(painter = icon, contentDescription = label, tint = color)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = label, fontSize = 12.sp, color = color, fontWeight = fontWeight)
     }

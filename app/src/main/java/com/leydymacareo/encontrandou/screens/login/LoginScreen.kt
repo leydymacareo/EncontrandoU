@@ -122,10 +122,10 @@ fun LoginScreen(
                 },
                 visualTransformation = PasswordVisualTransformation(),
                 shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.White,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
                     unfocusedBorderColor = Color(0xFF80D7F8),
-                    focusedBorderColor = Color(0xFF00AFF1)
+                    focusedBorderColor = Color(0xFF80D7F8),
                 )
             )
 

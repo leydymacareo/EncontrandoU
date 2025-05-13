@@ -19,13 +19,13 @@ import androidx.compose.ui.unit.sp
 import com.leydymacareo.encontrandou.R
 
 @Composable
-fun DetalleSolicitudUsuarioScreen() {
+fun DetalleSolicitudScreen(rol: String = "usuario", solicitudId: String) {
     Scaffold(
         topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, top = 40.dp, bottom = 16.dp),
+                    .padding(start = 30.dp, top = 40.dp, bottom = 30.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
@@ -47,7 +47,7 @@ fun DetalleSolicitudUsuarioScreen() {
         ) {
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFCF7)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E8)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
@@ -56,7 +56,7 @@ fun DetalleSolicitudUsuarioScreen() {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .background(Color(0xFFF3EAD4), shape = RoundedCornerShape(12.dp))
+                            .background(Color(0xFFFFEEC5), shape = RoundedCornerShape(12.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Icon(
@@ -72,6 +72,7 @@ fun DetalleSolicitudUsuarioScreen() {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     InfoItem("Código de la Solicitud", "67001")
+                    InfoItem("Nombre Propietario", "Juan Vargas")
                     InfoItem("Fecha de la Solicitud", "01/04/2025")
                     InfoItem("Nombre del objeto", "Mochila Negra")
                     InfoItem("Lugar de la perdida", "Edificio L5-1")
@@ -82,13 +83,13 @@ fun DetalleSolicitudUsuarioScreen() {
                     InfoItem("Marca o Modelo", "Totto")
 
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Descripcion Adicional", fontWeight = FontWeight.Bold)
+                    Text("Descripción Adicional", fontWeight = FontWeight.Bold)
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row {
                         Image(
-                            painter = painterResource(id = R.drawable.logo_unab), // reemplaza con tu imagen
+                            painter = painterResource(id = R.drawable.logo_unab),
                             contentDescription = "Imagen del objeto",
                             modifier = Modifier
                                 .size(80.dp)
@@ -102,19 +103,51 @@ fun DetalleSolicitudUsuarioScreen() {
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
-
-
                 }
             }
-            Button(
-                onClick = { /* acción cancelar */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1)),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            ) {
-                Text("Cancelar Solicitud", color = Color.White, fontWeight = FontWeight.Bold)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (rol == "usuario") {
+                Button(
+                    onClick = { /* acción cancelar */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text("Cancelar Solicitud", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            } else if (rol == "encargado") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = { /* rechazar solicitud */ },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6B6B)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
+                        Text("Rechazar", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Button(
+                        onClick = { /* asignar objeto */ },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
+                        Text("Asignar", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+                }
             }
         }
     }
@@ -132,6 +165,14 @@ fun InfoItem(label: String, value: String) {
 @Composable
 fun PreviewDetalleSolicitudUsuarioScreen() {
     MaterialTheme {
-        DetalleSolicitudUsuarioScreen()
+        DetalleSolicitudScreen(rol = "usuario", solicitudId = "preview")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDetalleSolicitudEncargadoScreen() {
+    MaterialTheme {
+        DetalleSolicitudScreen(rol = "encargado", solicitudId = "preview")
     }
 }

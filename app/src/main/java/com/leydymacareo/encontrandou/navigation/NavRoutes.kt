@@ -9,5 +9,6 @@ object NavRoutes {
     const val EncargadoHome = "encargado_home"
     const val UserHelp = "ayuda_usuario"
     const val UserProfile = "perfil_usuario"
+    const val DetalleSolicitud = "detalle_solicitud/{solicitudId}/{rol}"
 
 }

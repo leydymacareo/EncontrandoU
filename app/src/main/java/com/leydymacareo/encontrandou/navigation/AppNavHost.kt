@@ -1,6 +1,7 @@
 // AppNavHost.kt
 package com.leydymacareo.encontrandou.navigation
 
+import DetalleSolicitudScreen
 import HelpScreen
 import ProfileScreen
 import androidx.compose.runtime.Composable
@@ -16,6 +17,9 @@ import com.leydymacareo.encontrandou.screens.home.HomeScreenUsuario
 import com.leydymacareo.encontrandou.screens.login.*
 import com.leydymacareo.encontrandou.viewmodel.SessionState
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+
 
 @Composable
 fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
@@ -93,6 +97,19 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
         }
         composable("perfil_usuario") {
             ProfileScreen(navController) // O como se llame tu pantalla de perfil
+        }
+        composable(
+            route = NavRoutes.DetalleSolicitud,
+            arguments = listOf(
+                navArgument("solicitudId") { type = NavType.StringType },
+                navArgument("rol") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val solicitudId = backStackEntry.arguments?.getString("solicitudId") ?: ""
+            val rol = backStackEntry.arguments?.getString("rol") ?: "usuario"
+
+            // Pasa ambos argumentos al Composable
+            DetalleSolicitudScreen(rol = rol, solicitudId = solicitudId)
         }
 
     }
