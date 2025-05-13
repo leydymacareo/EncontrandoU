@@ -11,14 +11,13 @@ import com.leydymacareo.encontrandou.components.FormularioObjeto
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NuevaSolicitudScreen() {
+fun NuevoObjetoScreen() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Nueva Solicitud", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
+                title = { Text("Nuevo Objeto", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 navigationIcon = {
                     IconButton(onClick = { /* acción volver */ }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -28,11 +27,11 @@ fun NuevaSolicitudScreen() {
         }
     ) { innerPadding ->
         FormularioObjeto(
-            titulo = "Nueva Solicitud",
-            textoBoton = "Enviar Solicitud",
-            imagenObligatoria = false,
+            titulo = "Nuevo Objeto",
+            textoBoton = "Registrar Objeto",
+            imagenObligatoria = true,
             onSubmit = { formData, imageUri ->
-                println("[Solicitud] Formulario: $formData\nImagen: $imageUri")
+                println("[Encargado] Registro: $formData\nImagen: $imageUri")
             },
             modifier = Modifier.padding(innerPadding)
         )
