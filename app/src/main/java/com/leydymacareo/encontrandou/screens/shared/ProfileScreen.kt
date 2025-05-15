@@ -1,23 +1,23 @@
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+package com.leydymacareo.encontrandou.screens.profile
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.leydymacareo.encontrandou.NavRoutes
+import com.leydymacareo.encontrandou.R
+import com.leydymacareo.encontrandou.screens.home.NavBarItem
+import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,17 +26,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import com.leydymacareo.encontrandou.NavRoutes
-import com.leydymacareo.encontrandou.R
-import com.leydymacareo.encontrandou.screens.home.NavBarItem
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController) {
-    var selectedTab by remember { mutableStateOf("Inicio") }
+fun ProfileScreen(
+    navController: NavController,
+    sessionViewModel: SessionViewModel = viewModel()
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         topBar = {
@@ -59,8 +57,7 @@ fun ProfileScreen(navController: NavController) {
                 color = Color.White,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(70.dp),
-
+                    .height(70.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -72,33 +69,35 @@ fun ProfileScreen(navController: NavController) {
                     NavBarItem(
                         icon = painterResource(id = R.drawable.home),
                         label = "Inicio",
-                        selectedTab = selectedTab,
+                        isSelected = currentRoute == NavRoutes.UserHome,
                         onClick = {
-                            selectedTab = "Inicio"
-                            navController.navigate(NavRoutes.UserHome)
+                            if (currentRoute != NavRoutes.UserHome) {
+                                navController.navigate(NavRoutes.UserHome)
+                            }
                         }
                     )
 
                     NavBarItem(
                         icon = painterResource(id = R.drawable.help),
                         label = "Ayuda",
-                        selectedTab = selectedTab,
+                        isSelected = currentRoute == NavRoutes.UserHelp,
                         onClick = {
-                            selectedTab = "Ayuda"
-                            navController.navigate(NavRoutes.UserHelp)
+                            if (currentRoute != NavRoutes.UserHelp) {
+                                navController.navigate(NavRoutes.UserHelp)
+                            }
                         }
                     )
 
                     NavBarItem(
                         icon = painterResource(id = R.drawable.person),
                         label = "Perfil",
-                        selectedTab = selectedTab,
+                        isSelected = currentRoute == NavRoutes.UserProfile,
                         onClick = {
-                            selectedTab = "Perfil"
-                            navController.navigate(NavRoutes.UserProfile)
+                            if (currentRoute != NavRoutes.UserProfile) {
+                                navController.navigate(NavRoutes.UserProfile)
+                            }
                         }
                     )
-
                 }
             }
         }
@@ -145,7 +144,12 @@ fun ProfileScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { /* Acción cerrar sesión */ },
+                onClick = {
+                    sessionViewModel.logout()
+                    navController.navigate(NavRoutes.Welcome) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1)),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
@@ -153,18 +157,16 @@ fun ProfileScreen(navController: NavController) {
                     .height(48.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-
                     Text("Cerrar Sesión", color = Color.White, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
-                        imageVector = Icons.Default.ExitToApp, // O puedes usar ExitToApp
+                        imageVector = Icons.Default.ExitToApp,
                         contentDescription = "Cerrar sesión",
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )
                 }
             }
-
         }
     }
 }
@@ -182,21 +184,3 @@ fun ProfileItem(label: String, value: String) {
     }
 }
 
-
-@Composable
-fun EncargadoNavItem(label: String, icon: ImageVector, selectedTab: String, onClick: (String) -> Unit) {
-    val selected = label == selectedTab
-    val color = Color.Black
-    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-
-    Column(
-        modifier = Modifier
-            .clickable { onClick(label) }
-            .padding(horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(icon, contentDescription = label, tint = color)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, fontSize = 12.sp, color = color, fontWeight = fontWeight)
-    }
-}

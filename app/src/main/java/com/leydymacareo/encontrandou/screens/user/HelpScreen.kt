@@ -3,8 +3,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,10 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.screens.home.NavBarItem
@@ -28,7 +26,8 @@ import com.leydymacareo.encontrandou.screens.home.NavBarItem
 @Composable
 fun HelpScreen(navController: NavController) {
 
-    var selectedTab by remember { mutableStateOf("Inicio") }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         topBar = {
@@ -63,33 +62,35 @@ fun HelpScreen(navController: NavController) {
                     NavBarItem(
                         icon = painterResource(id = R.drawable.home),
                         label = "Inicio",
-                        selectedTab = selectedTab,
+                        isSelected = currentRoute == NavRoutes.UserHome,
                         onClick = {
-                            selectedTab = "Inicio"
-                            navController.navigate(NavRoutes.UserHome)
+                            if (currentRoute != NavRoutes.UserHome) {
+                                navController.navigate(NavRoutes.UserHome)
+                            }
                         }
                     )
 
                     NavBarItem(
                         icon = painterResource(id = R.drawable.help),
                         label = "Ayuda",
-                        selectedTab = selectedTab,
+                        isSelected = currentRoute == NavRoutes.UserHelp,
                         onClick = {
-                            selectedTab = "Ayuda"
-                            navController.navigate(NavRoutes.UserHelp)
+                            if (currentRoute != NavRoutes.UserHelp) {
+                                navController.navigate(NavRoutes.UserHelp)
+                            }
                         }
                     )
 
                     NavBarItem(
                         icon = painterResource(id = R.drawable.person),
                         label = "Perfil",
-                        selectedTab = selectedTab,
+                        isSelected = currentRoute == NavRoutes.UserProfile,
                         onClick = {
-                            selectedTab = "Perfil"
-                            navController.navigate(NavRoutes.UserProfile)
+                            if (currentRoute != NavRoutes.UserProfile) {
+                                navController.navigate(NavRoutes.UserProfile)
+                            }
                         }
                     )
-
                 }
             }
         }

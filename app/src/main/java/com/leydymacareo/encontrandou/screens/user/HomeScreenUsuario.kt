@@ -22,13 +22,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 
 
 @Composable
 fun HomeScreenUsuario(navController: NavController) {
-    var selectedTab by remember { mutableStateOf("Inicio") }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     val items = listOf(
         Triple("USB Blanca", "1 Abril 2024", "En Espera"),
@@ -68,14 +70,17 @@ fun HomeScreenUsuario(navController: NavController) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Acción del FAB */ },
+                onClick = {
+                    navController.navigate(NavRoutes.NuevaSolicitud)
+                },
                 containerColor = Color(0xFFFF9900),
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(8.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Nueva solicitud", tint = Color.White)
             }
-        },
+        }
+        ,
         floatingActionButtonPosition = FabPosition.End,
         bottomBar = {
             Surface(
@@ -94,29 +99,35 @@ fun HomeScreenUsuario(navController: NavController) {
                     NavBarItem(
                         icon = painterResource(id = R.drawable.home),
                         label = "Inicio",
-                        selectedTab = selectedTab
-                    ) {
-                        selectedTab = "Inicio"
-                        navController.navigate(NavRoutes.UserHome)
-                    }
+                        isSelected = currentRoute == NavRoutes.UserHome,
+                        onClick = {
+                            if (currentRoute != NavRoutes.UserHome) {
+                                navController.navigate(NavRoutes.UserHome)
+                            }
+                        }
+                    )
 
                     NavBarItem(
                         icon = painterResource(id = R.drawable.help),
                         label = "Ayuda",
-                        selectedTab = selectedTab
-                    ) {
-                        selectedTab = "Ayuda"
-                        navController.navigate(NavRoutes.UserHelp)
-                    }
+                        isSelected = currentRoute == NavRoutes.UserHelp,
+                        onClick = {
+                            if (currentRoute != NavRoutes.UserHelp) {
+                                navController.navigate(NavRoutes.UserHelp)
+                            }
+                        }
+                    )
 
                     NavBarItem(
                         icon = painterResource(id = R.drawable.person),
                         label = "Perfil",
-                        selectedTab = selectedTab
-                    ) {
-                        selectedTab = "Perfil"
-                        navController.navigate(NavRoutes.UserProfile)
-                    }
+                        isSelected = currentRoute == NavRoutes.UserProfile,
+                        onClick = {
+                            if (currentRoute != NavRoutes.UserProfile) {
+                                navController.navigate(NavRoutes.UserProfile)
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -186,13 +197,12 @@ fun HomeScreenUsuario(navController: NavController) {
 fun NavBarItem(
     icon: Painter,
     label: String,
-    selectedTab: String,
+    isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val selected = selectedTab == label
-    val color = if (selected) Color(0xFF00AFF1) else Color.DarkGray
-    val textColor = if (selected) Color(0xFF00AFF1) else Color.Black
-    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+    val color = if (isSelected) Color(0xFF00AFF1) else Color.DarkGray
+    val textColor = if (isSelected) Color(0xFF00AFF1) else Color.Black
+    val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
 
     Column(
         modifier = Modifier
@@ -205,5 +215,3 @@ fun NavBarItem(
         Text(text = label, fontSize = 12.sp, color = textColor, fontWeight = fontWeight)
     }
 }
-
-

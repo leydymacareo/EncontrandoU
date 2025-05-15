@@ -1,9 +1,8 @@
-// AppNavHost.kt
 package com.leydymacareo.encontrandou.navigation
 
 import DetalleSolicitudScreen
 import HelpScreen
-import ProfileScreen
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,6 +18,8 @@ import com.leydymacareo.encontrandou.viewmodel.SessionState
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.leydymacareo.encontrandou.screens.NuevaSolicitudScreen
+import com.leydymacareo.encontrandou.screens.profile.ProfileScreen
 
 
 @Composable
@@ -92,11 +93,11 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                 }
             }
         }
-        composable("ayuda_usuario") {
-            HelpScreen(navController) // O como se llame tu pantalla de ayuda
+        composable(NavRoutes.UserHelp) {
+            HelpScreen(navController)
         }
-        composable("perfil_usuario") {
-            ProfileScreen(navController) // O como se llame tu pantalla de perfil
+        composable(NavRoutes.UserProfile) {
+            ProfileScreen(navController)
         }
         composable(
             route = NavRoutes.DetalleSolicitud,
@@ -111,6 +112,11 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
             // Pasa ambos argumentos al Composable
             DetalleSolicitudScreen(rol = rol, solicitudId = solicitudId)
         }
+
+        composable(NavRoutes.NuevaSolicitud) {
+            NuevaSolicitudScreen(navController)
+        }
+
 
     }
 }
