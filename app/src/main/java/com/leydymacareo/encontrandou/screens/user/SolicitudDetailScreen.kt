@@ -1,11 +1,9 @@
 package com.leydymacareo.encontrandou.screens.user
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,27 +15,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.leydymacareo.encontrandou.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 
 @Composable
-fun SolicitudDetailScreen() {
+fun SolicitudDetailScreen(
+    solicitudId: String,
+    rol: String,
+    viewModel: SolicitudViewModel,
+    navController: NavController
+) {
+    val solicitud = viewModel.obtenerPorId(solicitudId)
+
+    if (solicitud == null) {
+        Text("No se encontró la solicitud.")
+        return
+    }
+
     Scaffold(
         topBar = {
-            Surface() {
+            Surface {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 24.dp),
+                        .background(Color(0xFFF5F5F5))
+                        .padding(top = 40.dp, bottom = 20.dp, start = 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                    IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
                     }
 
                     Text(
@@ -45,10 +57,10 @@ fun SolicitudDetailScreen() {
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Left
                     )
 
-                    Spacer(modifier = Modifier.width(48.dp)) // espacio para balancear el icono
+                    Spacer(modifier = Modifier.width(48.dp)) // para balancear el icono
                 }
             }
         },
@@ -62,21 +74,11 @@ fun SolicitudDetailScreen() {
             ) {
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF9EC)), // fondo amarillito claro
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF9EC)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            text = "Detalle de la Solicitud",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Estado
                         Row(
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
@@ -86,7 +88,7 @@ fun SolicitudDetailScreen() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "🕒 En Espera",
+                                text = "🕒 ${solicitud.estado}",
                                 color = Color.Black,
                                 fontWeight = FontWeight.Medium
                             )
@@ -94,37 +96,28 @@ fun SolicitudDetailScreen() {
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        InfoRow("Código de la Solicitud", "67001")
-                        InfoRow("Fecha de la Solicitud", "01/04/2025")
-                        InfoRow("Nombre del objeto", "Mochila Negra")
-                        InfoRow("Lugar de la pérdida", "Edificio L5-1")
-                        InfoRow("Fecha Aproximada", "30/03/2025")
-                        InfoRow("Hora Aproximada", "10:45 a.m.")
-                        InfoRow("Categoría del Objeto", "Bolsos")
-                        InfoRow("Color Principal", "Negro")
-                        InfoRow("Marca o Modelo", "Totto")
+                        InfoRow("Código de la Solicitud", solicitud.id)
+                        InfoRow("Fecha de la Solicitud", solicitud.fecha)
+                        InfoRow("Nombre del objeto", solicitud.nombreObjeto)
+                        InfoRow("Lugar de la pérdida", solicitud.lugar)
+                        InfoRow("Descripción Adicional", solicitud.descripcion)
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Text("Descripción Adicional", fontWeight = FontWeight.Bold)
+                        Text("Imagen del objeto", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        Row(verticalAlignment = Alignment.Top) {
-                            Image(
-                                painter = painterResource(id = R.drawable.logo_unab), // reemplaza por tu imagen del objeto
-                                contentDescription = "Objeto",
+                        solicitud.imagenUri?.let { uri ->
+                            AsyncImage(
+                                model = uri,
+                                contentDescription = "Imagen del objeto",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(100.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "Tiene un llavero de Pikachu y una etiqueta roja con mi nombre.",
-                                fontSize = 14.sp
-                            )
-                        }
+                        } ?: Text("Sin imagen proporcionada", fontSize = 14.sp)
 
                         Spacer(modifier = Modifier.height(24.dp))
 
@@ -159,10 +152,4 @@ fun InfoRow(label: String, value: String) {
         )
         Text(text = value, modifier = Modifier.weight(1f))
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSolicitudDetailScreen() {
-    SolicitudDetailScreen()
 }

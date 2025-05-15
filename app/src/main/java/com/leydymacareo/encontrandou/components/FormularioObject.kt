@@ -38,7 +38,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.core.content.FileProvider
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun FormularioObjeto(
     titulo: String,
@@ -75,6 +75,16 @@ fun FormularioObjeto(
         cameraLauncher.launch(uri)
     }
 
+    val camposValidos by derivedStateOf {
+        formState.nombreObjeto.isNotBlank() &&
+                formState.lugar.isNotBlank() &&
+                formState.fecha.isNotBlank() &&
+                formState.hora.isNotBlank() &&
+                formState.categoria.isNotBlank() &&
+                formState.color.isNotBlank() &&
+                (!imagenObligatoria || imageUri != null)
+    }
+
     Column(
         modifier = modifier
             .padding(horizontal = 20.dp)
@@ -82,8 +92,6 @@ fun FormularioObjeto(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-
-        //Text(text = titulo, fontWeight = FontWeight.Bold, fontSize = 22.sp)
 
         LabeledField("Nombre del objeto*", "Ej: Mochila Negra", formState.nombreObjeto) {
             formState = formState.copy(nombreObjeto = it)
@@ -185,19 +193,25 @@ fun FormularioObjeto(
                 }
             )
         }
+        if (!camposValidos) {
+            Text(
+                text = "Por favor, completa todos los campos obligatorios.",
+                color = Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+        }
 
         Button(
-            onClick = {
-                if (imagenObligatoria && imageUri == null) {
-                    // Mostrar error si es obligatorio y no hay imagen
-                    return@Button
-                }
-                onSubmit(formState, imageUri)
-            },
+            onClick = { onSubmit(formState, imageUri) },
+            enabled = camposValidos,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1)),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (camposValidos) Color(0xFF00AFF1) else Color.Gray
+            ),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(textoBoton, fontWeight = FontWeight.Bold, color = Color.White)
@@ -206,6 +220,8 @@ fun FormularioObjeto(
         Spacer(modifier = Modifier.height(90.dp))
     }
 }
+
+
 @Composable
 fun LabeledDatePickerField(
     label: String,

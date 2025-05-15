@@ -11,11 +11,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
+import com.leydymacareo.encontrandou.models.Solicitud
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NuevaSolicitudScreen(navController: NavController) {
+fun NuevaSolicitudScreen(
+    navController: NavController,
+    viewModel: SolicitudViewModel = viewModel()
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -35,7 +42,22 @@ fun NuevaSolicitudScreen(navController: NavController) {
             textoBoton = "Enviar Solicitud",
             imagenObligatoria = false,
             onSubmit = { formData, imageUri ->
-                println("[Solicitud] Formulario: $formData\nImagen: $imageUri")
+                val nuevaSolicitud = Solicitud(
+                    id = viewModel.generarIdUnico(),
+                    nombreObjeto = formData.nombreObjeto,
+                    fecha = formData.fecha,
+                    hora = formData.hora,
+                    categoria = formData.categoria,
+                    color = formData.color,
+                    estado = "En Espera",
+                    lugar = formData.lugar,
+                    descripcion = formData.descripcion,
+                    imagenUri = imageUri?.toString()
+                )
+
+
+                viewModel.agregarSolicitud(nuevaSolicitud)
+                navController.popBackStack() // Regresar al Home automáticamente
             },
             modifier = Modifier.padding(innerPadding)
         )

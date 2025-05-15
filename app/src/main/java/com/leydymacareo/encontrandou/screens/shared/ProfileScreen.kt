@@ -16,7 +16,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
-import com.leydymacareo.encontrandou.screens.home.NavBarItem
+import com.leydymacareo.encontrandou.screens.user.NavBarItem
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier

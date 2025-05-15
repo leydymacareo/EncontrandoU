@@ -1,5 +1,8 @@
-package com.leydymacareo.encontrandou.screens.home
-
+package com.leydymacareo.encontrandou.screens.user
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
+import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
+import com.leydymacareo.encontrandou.models.Solicitud
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,10 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -28,16 +30,15 @@ import com.leydymacareo.encontrandou.R
 
 
 @Composable
-fun HomeScreenUsuario(navController: NavController) {
+fun HomeScreenUsuario(
+    navController: NavController,
+    viewModel: SolicitudViewModel = viewModel()
+)
+{
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val items = listOf(
-        Triple("USB Blanca", "1 Abril 2024", "En Espera"),
-        Triple("Mochila azul", "20 de Febrero 2024", "Aprobada"),
-        Triple("Billetera roja", "1 Noviembre 2023", "Entregada"),
-        Triple("Llaves de carro", "1 Marzo 2024", "Rechazada")
-    )
+    val solicitudes by viewModel.solicitudes.collectAsState()
 
     val statusIcons = mapOf(
         "Aprobada" to Icons.Default.ThumbUp,
@@ -143,11 +144,32 @@ fun HomeScreenUsuario(navController: NavController) {
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            items.forEach { (nombre, fecha, estado) ->
+            if (solicitudes.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 80.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Aún no has creado ninguna solicitud",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+
+            solicitudes.forEach { solicitud ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 8.dp)
+                        .clickable {
+                            navController.navigate("detalle_solicitud/${solicitud.id}/usuario")
+                        },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
@@ -155,6 +177,7 @@ fun HomeScreenUsuario(navController: NavController) {
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val estado = solicitud.estado
                         if (estado == "En Espera") {
                             Icon(
                                 painter = painterResource(id = R.drawable.accesstime),
@@ -174,10 +197,10 @@ fun HomeScreenUsuario(navController: NavController) {
                         Spacer(modifier = Modifier.width(16.dp))
 
                         Column {
-                            Text(text = nombre, fontWeight = FontWeight.Bold, color = Color.Black)
-                            Text(text = fecha, color = Color.Black, fontSize = 13.sp)
+                            Text(text = solicitud.nombreObjeto, fontWeight = FontWeight.Bold, color = Color.Black)
+                            Text(text = solicitud.fecha, color = Color.Black, fontSize = 13.sp)
                             Text(
-                                text = estado,
+                                text = solicitud.estado,
                                 color = statusColors[estado] ?: Color.Gray,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold
@@ -186,6 +209,7 @@ fun HomeScreenUsuario(navController: NavController) {
                     }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(90.dp))
         }

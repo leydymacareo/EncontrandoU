@@ -2,30 +2,30 @@ package com.leydymacareo.encontrandou.navigation
 
 import DetalleSolicitudScreen
 import HelpScreen
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.screens.staff.EncargadoHomeScreen
-import com.leydymacareo.encontrandou.screens.home.HomeScreenUsuario
+import com.leydymacareo.encontrandou.screens.user.HomeScreenUsuario
 import com.leydymacareo.encontrandou.screens.login.*
 import com.leydymacareo.encontrandou.viewmodel.SessionState
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
+import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel // ✅ Importación añadida
 import com.leydymacareo.encontrandou.screens.NuevaSolicitudScreen
 import com.leydymacareo.encontrandou.screens.profile.ProfileScreen
-
+import com.leydymacareo.encontrandou.screens.user.SolicitudDetailScreen
 
 @Composable
 fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
     val navController = rememberNavController()
     val sessionState = sessionViewModel.sessionState.collectAsState().value
+
+    val solicitudViewModel: SolicitudViewModel = viewModel() // ✅ Se crea una única instancia
 
     NavHost(navController = navController, startDestination = NavRoutes.Welcome) {
 
@@ -59,7 +59,7 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
         composable(NavRoutes.UserHome) {
             when (sessionState) {
                 is SessionState.Loading -> {
-                    // Aquí podrías mostrar un indicador de carga
+                    // Indicador de carga opcional
                 }
                 is SessionState.LoggedOut -> {
                     LaunchedEffect(Unit) {
@@ -69,16 +69,14 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                     }
                 }
                 is SessionState.LoggedIn -> {
-                    HomeScreenUsuario(navController)
+                    HomeScreenUsuario(navController, viewModel = solicitudViewModel) // ✅ ViewModel pasado
                 }
             }
         }
 
         composable(NavRoutes.EncargadoHome) {
             when (sessionState) {
-                is SessionState.Loading -> {
-                    // Aquí podrías mostrar un indicador de carga
-                }
+                is SessionState.Loading -> {}
                 is SessionState.LoggedOut -> {
                     LaunchedEffect(Unit) {
                         navController.navigate(NavRoutes.Login) {
@@ -87,18 +85,19 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                     }
                 }
                 is SessionState.LoggedIn -> {
-                    EncargadoHomeScreen(navController = navController,
-                        sessionViewModel = sessionViewModel)
-
+                    EncargadoHomeScreen(navController = navController, sessionViewModel = sessionViewModel)
                 }
             }
         }
+
         composable(NavRoutes.UserHelp) {
             HelpScreen(navController)
         }
+
         composable(NavRoutes.UserProfile) {
             ProfileScreen(navController)
         }
+
         composable(
             route = NavRoutes.DetalleSolicitud,
             arguments = listOf(
@@ -109,14 +108,19 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
             val solicitudId = backStackEntry.arguments?.getString("solicitudId") ?: ""
             val rol = backStackEntry.arguments?.getString("rol") ?: "usuario"
 
-            // Pasa ambos argumentos al Composable
-            DetalleSolicitudScreen(rol = rol, solicitudId = solicitudId)
+            SolicitudDetailScreen(
+                solicitudId = solicitudId,
+                rol = rol,
+                viewModel = solicitudViewModel,
+                navController = navController
+            )
         }
 
         composable(NavRoutes.NuevaSolicitud) {
-            NuevaSolicitudScreen(navController)
+            NuevaSolicitudScreen(
+                navController = navController,
+                viewModel = solicitudViewModel // ✅ ViewModel compartido
+            )
         }
-
-
     }
 }
