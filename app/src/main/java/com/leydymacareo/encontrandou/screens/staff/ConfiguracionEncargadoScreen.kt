@@ -13,14 +13,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 
 @Composable
-fun ConfiguracionEncargadoScreen() {
+fun ConfiguracionEncargadoScreen(navController: NavController) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     var selectedTab by remember { mutableStateOf("Categoría") }
     var categorias by remember { mutableStateOf(mutableListOf("Celulares", "Audífonos", "Computadores")) }
     var lugares by remember { mutableStateOf(mutableListOf("Bloque A", "Biblioteca", "Cafetería")) }
@@ -54,12 +60,14 @@ fun ConfiguracionEncargadoScreen() {
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                Text(text = "Ajustes",
+                Text(
+                    text = "Ajustes",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 40.dp, bottom = 20.dp),)
+                        .padding(top = 40.dp, bottom = 20.dp)
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -97,29 +105,18 @@ fun ConfiguracionEncargadoScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    EncargadoNavItem(
-                        label = "Inventario",
-                        icon = Icons.Default.Person,
-                        selectedTab = selectedTab
-                    ) { selectedTab = "Inventario" }
-
-                    EncargadoNavItem(
-                        label = "Solicitudes",
-                        icon = Icons.Default.List,
-                        selectedTab = selectedTab
-                    ) { selectedTab = "Solicitudes" }
-
-                    EncargadoNavItem(
-                        label = "Perfil",
-                        icon = Icons.Default.Person,
-                        selectedTab = selectedTab
-                    ) { selectedTab = "Perfil" }
-
-                    EncargadoNavItem(
-                        label = "Ajustes",
-                        icon = Icons.Default.Settings,
-                        selectedTab = selectedTab
-                    ) { selectedTab = "Ajustes" }
+                    EncargadoNavItem("Inventario", R.drawable.inventory, currentRoute == NavRoutes.EncargadoHome) {
+                        if (currentRoute != NavRoutes.EncargadoHome) navController.navigate(NavRoutes.EncargadoHome)
+                    }
+                    EncargadoNavItem("Solicitudes", R.drawable.list, currentRoute == NavRoutes.EncargadoSolicitudes) {
+                        if (currentRoute != NavRoutes.EncargadoSolicitudes) navController.navigate(NavRoutes.EncargadoSolicitudes)
+                    }
+                    EncargadoNavItem("Perfil", R.drawable.person, currentRoute == NavRoutes.EncargadoProfile) {
+                        if (currentRoute != NavRoutes.UserProfile) navController.navigate(NavRoutes.EncargadoProfile)
+                    }
+                    EncargadoNavItem("Ajustes", R.drawable.settings, currentRoute == NavRoutes.EncargadoAjustes) {
+                        if (currentRoute != NavRoutes.EncargadoAjustes) navController.navigate(NavRoutes.EncargadoAjustes)
+                    }
                 }
             }
         }
@@ -220,13 +217,5 @@ fun ConfiguracionEncargadoScreen() {
 
             Spacer(modifier = Modifier.height(90.dp))
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewConfiguracionEncargadoScreen() {
-    MaterialTheme {
-        ConfiguracionEncargadoScreen()
     }
 }

@@ -23,13 +23,16 @@ import androidx.compose.ui.unit.sp
 import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.leydymacareo.encontrandou.NavRoutes
 
 @Composable
 fun EncargadoHomeScreen(
     navController: NavController,
     sessionViewModel: SessionViewModel
 ) {
-    var selectedTab by remember { mutableStateOf("Inventario") }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     val items = listOf(
         Triple("USB Blanca", "1 Febrero 2024", "Disponible"),
@@ -111,10 +114,18 @@ fun EncargadoHomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    EncargadoNavItem("Inventario", painterResource(id = R.drawable.inventory), selectedTab) { selectedTab = it }
-                    EncargadoNavItem("Solicitudes", painterResource(id = R.drawable.list), selectedTab) { selectedTab = it }
-                    EncargadoNavItem("Perfil", painterResource(id = R.drawable.person), selectedTab) { selectedTab = it }
-                    EncargadoNavItem("Ajustes", painterResource(id = R.drawable.settings), selectedTab) { selectedTab = it }
+                    EncargadoNavItem("Inventario", R.drawable.inventory, currentRoute == NavRoutes.EncargadoHome) {
+                        if (currentRoute != NavRoutes.EncargadoHome) navController.navigate(NavRoutes.EncargadoHome)
+                    }
+                    EncargadoNavItem("Solicitudes", R.drawable.list, currentRoute == NavRoutes.EncargadoSolicitudes) {
+                        if (currentRoute != NavRoutes.EncargadoSolicitudes) navController.navigate(NavRoutes.EncargadoSolicitudes)
+                    }
+                    EncargadoNavItem("Perfil", R.drawable.person, currentRoute == NavRoutes.EncargadoProfile) {
+                        if (currentRoute != NavRoutes.UserProfile) navController.navigate(NavRoutes.EncargadoProfile)
+                    }
+                    EncargadoNavItem("Ajustes", R.drawable.settings, currentRoute == NavRoutes.EncargadoAjustes) {
+                        if (currentRoute != NavRoutes.EncargadoAjustes) navController.navigate(NavRoutes.EncargadoAjustes)
+                    }
                 }
             }
         }
@@ -169,18 +180,17 @@ fun EncargadoHomeScreen(
 }
 
 @Composable
-fun EncargadoNavItem(label: String, icon: Painter, selectedTab: String, onClick: (String) -> Unit) {
-    val selected = label == selectedTab
-    val color = Color.Black
-    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+fun EncargadoNavItem(label: String, iconId: Int, isSelected: Boolean, onClick: () -> Unit) {
+    val color = if (isSelected) Color(0xFF00AFF1) else Color.DarkGray
+    val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
 
     Column(
         modifier = Modifier
-            .clickable { onClick(label) }
+            .clickable { onClick() }
             .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(painter = icon, contentDescription = label, tint = color)
+        Icon(painter = painterResource(id = iconId), contentDescription = label, tint = color)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = label, fontSize = 12.sp, color = color, fontWeight = fontWeight)
     }

@@ -15,20 +15,24 @@ import com.leydymacareo.encontrandou.screens.user.HomeScreenUsuario
 import com.leydymacareo.encontrandou.screens.login.*
 import com.leydymacareo.encontrandou.viewmodel.SessionState
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
-import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel // ✅ Importación añadida
+import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 import com.leydymacareo.encontrandou.screens.NuevaSolicitudScreen
-import com.leydymacareo.encontrandou.screens.profile.ProfileScreen
+import com.leydymacareo.encontrandou.screens.staff.ConfiguracionEncargadoScreen
+import com.leydymacareo.encontrandou.screens.staff.EncargadoProfileScreen
+import com.leydymacareo.encontrandou.screens.staff.SolicitudesEncargadoScreen
 import com.leydymacareo.encontrandou.screens.user.SolicitudDetailScreen
+import com.leydymacareo.encontrandou.screens.user.UserProfileScreen
 
 @Composable
 fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
     val navController = rememberNavController()
     val sessionState = sessionViewModel.sessionState.collectAsState().value
 
-    val solicitudViewModel: SolicitudViewModel = viewModel() // ✅ Se crea una única instancia
+    val solicitudViewModel: SolicitudViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = NavRoutes.Welcome) {
 
+        // Login & registro
         composable(NavRoutes.Welcome) {
             WelcomeScreen(
                 onLoginClick = { navController.navigate(NavRoutes.Login) },
@@ -37,11 +41,7 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
         }
 
         composable(NavRoutes.Register) {
-            RegisterScreen(
-                navController = navController,
-                sessionViewModel = sessionViewModel,
-                onBack = { navController.popBackStack() }
-            )
+            RegisterScreen(navController, sessionViewModel) { navController.popBackStack() }
         }
 
         composable(NavRoutes.AccountCreated) {
@@ -49,18 +49,13 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
         }
 
         composable(NavRoutes.Login) {
-            LoginScreen(
-                navController = navController,
-                sessionViewModel = sessionViewModel,
-                onBack = { navController.popBackStack() }
-            )
+            LoginScreen(navController, sessionViewModel) { navController.popBackStack() }
         }
 
+        // Home Usuario
         composable(NavRoutes.UserHome) {
             when (sessionState) {
-                is SessionState.Loading -> {
-                    // Indicador de carga opcional
-                }
+                is SessionState.Loading -> {}
                 is SessionState.LoggedOut -> {
                     LaunchedEffect(Unit) {
                         navController.navigate(NavRoutes.Login) {
@@ -69,11 +64,12 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                     }
                 }
                 is SessionState.LoggedIn -> {
-                    HomeScreenUsuario(navController, viewModel = solicitudViewModel) // ✅ ViewModel pasado
+                    HomeScreenUsuario(navController, viewModel = solicitudViewModel)
                 }
             }
         }
 
+        // Home Encargado
         composable(NavRoutes.EncargadoHome) {
             when (sessionState) {
                 is SessionState.Loading -> {}
@@ -85,19 +81,26 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                     }
                 }
                 is SessionState.LoggedIn -> {
-                    EncargadoHomeScreen(navController = navController, sessionViewModel = sessionViewModel)
+                    EncargadoHomeScreen(navController, sessionViewModel)
                 }
             }
         }
 
+        // Ayuda (usuario)
         composable(NavRoutes.UserHelp) {
             HelpScreen(navController)
         }
 
         composable(NavRoutes.UserProfile) {
-            ProfileScreen(navController)
+            UserProfileScreen(navController = navController, sessionViewModel = sessionViewModel)
         }
 
+        composable(NavRoutes.EncargadoProfile) {
+            EncargadoProfileScreen(navController = navController, sessionViewModel = sessionViewModel)
+        }
+
+
+        // Solicitud Detalle
         composable(
             route = NavRoutes.DetalleSolicitud,
             arguments = listOf(
@@ -116,11 +119,19 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
             )
         }
 
+        // Nueva solicitud (usuario)
         composable(NavRoutes.NuevaSolicitud) {
-            NuevaSolicitudScreen(
-                navController = navController,
-                viewModel = solicitudViewModel // ✅ ViewModel compartido
-            )
+            NuevaSolicitudScreen(navController, solicitudViewModel)
+        }
+
+        // Pantallas Encargado
+        composable(NavRoutes.EncargadoSolicitudes) {
+            SolicitudesEncargadoScreen(navController)
+        }
+
+        composable(NavRoutes.EncargadoAjustes) {
+            ConfiguracionEncargadoScreen(navController)
         }
     }
 }
+
