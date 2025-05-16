@@ -43,8 +43,9 @@ fun NuevaSolicitudScreen(
             imagenObligatoria = false,
             onSubmit = { formData, imageUri ->
                 val nuevaSolicitud = Solicitud(
-                    id = viewModel.generarIdUnico(),
+                    id = viewModel.generarCodigoSolicitud(),
                     nombreObjeto = formData.nombreObjeto,
+                    propietario = "Nombre del Usuario",
                     fecha = formData.fecha,
                     hora = formData.hora,
                     categoria = formData.categoria,

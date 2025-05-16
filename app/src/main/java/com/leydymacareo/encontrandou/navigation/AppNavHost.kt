@@ -1,6 +1,6 @@
 package com.leydymacareo.encontrandou.navigation
 
-import DetalleSolicitudScreen
+
 import HelpScreen
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -17,7 +17,9 @@ import com.leydymacareo.encontrandou.viewmodel.SessionState
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 import com.leydymacareo.encontrandou.screens.NuevaSolicitudScreen
+import com.leydymacareo.encontrandou.screens.NuevoObjetoScreen
 import com.leydymacareo.encontrandou.screens.staff.ConfiguracionEncargadoScreen
+import com.leydymacareo.encontrandou.screens.staff.DetalleObjetoScreen
 import com.leydymacareo.encontrandou.screens.staff.EncargadoProfileScreen
 import com.leydymacareo.encontrandou.screens.staff.SolicitudesEncargadoScreen
 import com.leydymacareo.encontrandou.screens.user.SolicitudDetailScreen
@@ -81,7 +83,9 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                     }
                 }
                 is SessionState.LoggedIn -> {
-                    EncargadoHomeScreen(navController, sessionViewModel)
+                    EncargadoHomeScreen(navController = navController,
+                        sessionViewModel = sessionViewModel,
+                        viewModel = solicitudViewModel)
                 }
             }
         }
@@ -132,6 +136,22 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
         composable(NavRoutes.EncargadoAjustes) {
             ConfiguracionEncargadoScreen(navController)
         }
+
+        composable(NavRoutes.NuevoObjeto) {
+            NuevoObjetoScreen(navController, solicitudViewModel)
+        }
+        composable(
+            route = NavRoutes.DetalleObjeto,
+            arguments = listOf(navArgument("objetoId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val objetoId = backStackEntry.arguments?.getString("objetoId") ?: ""
+            DetalleObjetoScreen(
+                objetoId = objetoId,
+                viewModel = solicitudViewModel,
+                navController = navController
+            )
+        }
+
     }
 }
 

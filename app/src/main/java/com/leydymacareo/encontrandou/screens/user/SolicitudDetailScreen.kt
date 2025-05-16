@@ -93,19 +93,7 @@ fun SolicitudDetailScreen(
                                 fontWeight = FontWeight.Medium
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        InfoRow("Código de la Solicitud", solicitud.id)
-                        InfoRow("Fecha de la Solicitud", solicitud.fecha)
-                        InfoRow("Nombre del objeto", solicitud.nombreObjeto)
-                        InfoRow("Lugar de la pérdida", solicitud.lugar)
-                        InfoRow("Descripción Adicional", solicitud.descripcion)
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text("Imagen del objeto", fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         solicitud.imagenUri?.let { uri ->
                             AsyncImage(
@@ -113,11 +101,37 @@ fun SolicitudDetailScreen(
                                 contentDescription = "Imagen del objeto",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                                    .size(200.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .align(Alignment.CenterHorizontally)
                             )
-                        } ?: Text("Sin imagen proporcionada", fontSize = 14.sp)
+                        } ?: Text(
+                            text = "Sin imagen proporcionada",
+                            fontSize = 14.sp,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        InfoRow("Código de la Solicitud", solicitud.id)
+                        InfoRow("Nombre del Propietario", solicitud.propietario)
+                        InfoRow("Fecha de la Solicitud", solicitud.fecha)
+                        InfoRow("Nombre del objeto", solicitud.nombreObjeto)
+                        InfoRow("Lugar de la pérdida", solicitud.lugar)
+                        InfoRow("Fecha Aproximada", solicitud.fecha)
+                        InfoRow("Hora Aproximada", solicitud.hora)
+                        InfoRow("Categoría", solicitud.categoria)
+                        InfoRow("Marca o Modelo", if (solicitud.descripcion.isBlank()) "No especificado" else solicitud.descripcion)
+                        InfoRow("Color Principal", solicitud.color)
+
+                        InfoRow("Descripción Adicional", solicitud.descripcion)
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+
 
                         Spacer(modifier = Modifier.height(24.dp))
 

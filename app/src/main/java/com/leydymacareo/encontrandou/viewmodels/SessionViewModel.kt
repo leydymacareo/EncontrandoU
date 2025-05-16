@@ -1,4 +1,3 @@
-// SessionViewModel.kt
 package com.leydymacareo.encontrandou.viewmodel
 
 import androidx.lifecycle.ViewModel

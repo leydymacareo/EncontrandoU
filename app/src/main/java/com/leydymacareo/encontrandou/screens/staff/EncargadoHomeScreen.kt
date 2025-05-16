@@ -13,9 +13,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,22 +26,22 @@ import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import coil.compose.AsyncImage
 import com.leydymacareo.encontrandou.NavRoutes
+import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
+import com.leydymacareo.encontrandou.models.ObjetoEncontrado
+
 
 @Composable
 fun EncargadoHomeScreen(
     navController: NavController,
-    sessionViewModel: SessionViewModel
+    sessionViewModel: SessionViewModel,
+    viewModel: SolicitudViewModel
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val items = listOf(
-        Triple("USB Blanca", "1 Febrero 2024", "Disponible"),
-        Triple("Portátil HP", "20 de Febrero 2024", "Disponible"),
-        Triple("Billetera roja", "4 Marzo 2025", "Asignado"),
-        Triple("Bolso Azul", "18 Marzo 2025", "Entregado")
-    )
+    val objetos by viewModel.objetosEncontrados.collectAsState()
 
     val statusColors = mapOf(
         "Disponible" to Color(0xFFFFA000),
@@ -91,7 +93,9 @@ fun EncargadoHomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = {
+                    navController.navigate(NavRoutes.NuevoObjeto)
+                },
                 containerColor = Color(0xFFFF9900),
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(8.dp)
@@ -140,35 +144,59 @@ fun EncargadoHomeScreen(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            items.forEach { (nombre, fecha, estado) ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+            if (objetos.isEmpty()) {
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "Aún no has registrado ningún objeto.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                objetos.forEach { objeto ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                navController.navigate("detalle_objeto/${objeto.id}")
+                            },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(Color.LightGray, RoundedCornerShape(8.dp))
-                        )
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!objeto.imagenUri.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = objeto.imagenUri,
+                                    contentDescription = "Imagen del objeto",
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(Color.LightGray, RoundedCornerShape(8.dp))
+                                )
+                            }
 
-                        Spacer(modifier = Modifier.width(16.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
 
-                        Column {
-                            Text(text = nombre, fontWeight = FontWeight.Bold, color = Color.Black)
-                            Text(text = fecha, fontSize = 13.sp, color = Color.Black)
-                            Text(
-                                text = estado,
-                                color = statusColors[estado] ?: Color.Gray,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Column {
+                                Text(text = objeto.nombre, fontWeight = FontWeight.Bold, color = Color.Black)
+                                Text(text = objeto.fecha, fontSize = 13.sp, color = Color.Black)
+                                Text(
+                                    text = objeto.estado,
+                                    color = statusColors[objeto.estado] ?: Color.Gray,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
                 }
@@ -178,6 +206,7 @@ fun EncargadoHomeScreen(
         }
     }
 }
+
 
 @Composable
 fun EncargadoNavItem(label: String, iconId: Int, isSelected: Boolean, onClick: () -> Unit) {

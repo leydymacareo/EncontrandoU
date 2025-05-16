@@ -165,7 +165,7 @@ fun FormularioObjeto(
                 contentDescription = "Imagen seleccionada",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
+                    .size(400.dp),
                 contentScale = ContentScale.Crop
             )
         }
@@ -510,4 +510,9 @@ fun TimePickerDialog(
         },
         text = { content() }
     )
+}
+
+fun obtenerFechaActual(): String {
+    val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+    return sdf.format(java.util.Date())
 }

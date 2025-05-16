@@ -10,10 +10,18 @@ import androidx.compose.foundation.layout.*
 import com.leydymacareo.encontrandou.components.FormularioObjeto
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.navigation.NavController
+import com.leydymacareo.encontrandou.components.obtenerFechaActual
+import com.leydymacareo.encontrandou.models.ObjetoEncontrado
+import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NuevoObjetoScreen() {
+fun NuevoObjetoScreen(
+    navController: NavController,
+    viewModel: SolicitudViewModel
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -31,7 +39,23 @@ fun NuevoObjetoScreen() {
             textoBoton = "Registrar Objeto",
             imagenObligatoria = true,
             onSubmit = { formData, imageUri ->
-                println("[Encargado] Registro: $formData\nImagen: $imageUri")
+                val nuevoObjeto = ObjetoEncontrado(
+                    id = viewModel.generarCodigoObjeto(),
+                    nombre = formData.nombreObjeto,
+                    fecha = obtenerFechaActual(),
+                    imagenUri = imageUri?.toString(),
+                    descripcion = formData.descripcion,
+                    categoria = formData.categoria,
+                    color = formData.color,
+                    marca = formData.marca,
+                    lugar = formData.lugar,
+                    fechaAproximada = formData.fecha,
+                    horaAproximada = formData.hora
+                )
+
+                viewModel.agregarObjeto(nuevoObjeto)
+                navController.popBackStack()
+
             },
             modifier = Modifier.padding(innerPadding)
         )

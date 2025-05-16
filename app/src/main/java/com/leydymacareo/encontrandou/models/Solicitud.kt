@@ -3,6 +3,7 @@ package com.leydymacareo.encontrandou.models
 data class Solicitud(
     val id: String,
     val nombreObjeto: String,
+    val propietario: String,
     val fecha: String,
     val hora: String,
     val categoria: String,
