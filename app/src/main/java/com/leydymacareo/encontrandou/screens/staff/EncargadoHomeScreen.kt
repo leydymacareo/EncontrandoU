@@ -30,6 +30,7 @@ import coil.compose.AsyncImage
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 import com.leydymacareo.encontrandou.models.ObjetoEncontrado
+import com.leydymacareo.encontrandou.viewmodel.SessionState
 
 
 @Composable
@@ -38,6 +39,11 @@ fun EncargadoHomeScreen(
     sessionViewModel: SessionViewModel,
     viewModel: SolicitudViewModel
 ) {
+    val sessionState by sessionViewModel.sessionState.collectAsState()
+    val nombre = (sessionState as? SessionState.LoggedIn)?.name ?: "Encargado"
+    val correo = (sessionState as? SessionState.LoggedIn)?.email ?: "correo@unab.edu.co"
+    val rol = (sessionState as? SessionState.LoggedIn)?.role ?: "Encargado"
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 

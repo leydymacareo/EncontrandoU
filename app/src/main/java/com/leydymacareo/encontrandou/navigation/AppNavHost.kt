@@ -123,12 +123,14 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
             )
         }
 
-        // Nueva solicitud (usuario)
         composable(NavRoutes.NuevaSolicitud) {
-            NuevaSolicitudScreen(navController, solicitudViewModel)
+            NuevaSolicitudScreen(
+                navController = navController,
+                viewModel = solicitudViewModel,
+                sessionViewModel = sessionViewModel
+            )
         }
 
-        // Pantallas Encargado
         composable(NavRoutes.EncargadoSolicitudes) {
             SolicitudesEncargadoScreen(navController)
         }

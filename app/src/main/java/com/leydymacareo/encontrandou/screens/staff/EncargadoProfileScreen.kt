@@ -3,27 +3,33 @@ package com.leydymacareo.encontrandou.screens.staff
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.components.ProfileContent
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import com.leydymacareo.encontrandou.viewmodel.SessionState
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EncargadoProfileScreen(navController: NavController, sessionViewModel: SessionViewModel = viewModel()) {
+fun EncargadoProfileScreen(navController: NavController, sessionViewModel: SessionViewModel) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val sessionState by sessionViewModel.sessionState.collectAsState()
+    val nombre = (sessionState as? SessionState.LoggedIn)?.name ?: "Encargado"
+    val correo = (sessionState as? SessionState.LoggedIn)?.email ?: "correo@unab.edu.co"
+    val rol = (sessionState as? SessionState.LoggedIn)?.role ?: "Encargado"
 
     Scaffold(
         topBar = {
@@ -43,36 +49,17 @@ fun EncargadoProfileScreen(navController: NavController, sessionViewModel: Sessi
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    EncargadoNavItem(
-                        label = "Inventario",
-                        iconId = R.drawable.inventory,
-                        isSelected = currentRoute == NavRoutes.EncargadoHome
-                    ) {
-                        navController.navigate(NavRoutes.EncargadoHome)
+                    EncargadoNavItem("Inventario", R.drawable.inventory, currentRoute == NavRoutes.EncargadoHome) {
+                        if (currentRoute != NavRoutes.EncargadoHome) navController.navigate(NavRoutes.EncargadoHome)
                     }
-
-                    EncargadoNavItem(
-                        label = "Solicitudes",
-                        iconId = R.drawable.list,
-                        isSelected = currentRoute == NavRoutes.EncargadoSolicitudes
-                    ) {
-                        navController.navigate(NavRoutes.EncargadoSolicitudes)
+                    EncargadoNavItem("Solicitudes", R.drawable.list, currentRoute == NavRoutes.EncargadoSolicitudes) {
+                        if (currentRoute != NavRoutes.EncargadoSolicitudes) navController.navigate(NavRoutes.EncargadoSolicitudes)
                     }
-
-                    EncargadoNavItem(
-                        label = "Perfil",
-                        iconId = R.drawable.person,
-                        isSelected = currentRoute == NavRoutes.EncargadoProfile
-                    ) {
-                        navController.navigate(NavRoutes.EncargadoProfile)
+                    EncargadoNavItem("Perfil", R.drawable.person, currentRoute == NavRoutes.EncargadoProfile) {
+                        if (currentRoute != NavRoutes.EncargadoProfile) navController.navigate(NavRoutes.EncargadoProfile)
                     }
-
-                    EncargadoNavItem(
-                        label = "Ajustes",
-                        iconId = R.drawable.settings,
-                        isSelected = currentRoute == NavRoutes.EncargadoAjustes
-                    ) {
-                        navController.navigate(NavRoutes.EncargadoAjustes)
+                    EncargadoNavItem("Ajustes", R.drawable.settings, currentRoute == NavRoutes.EncargadoAjustes) {
+                        if (currentRoute != NavRoutes.EncargadoAjustes) navController.navigate(NavRoutes.EncargadoAjustes)
                     }
                 }
             }
@@ -80,9 +67,9 @@ fun EncargadoProfileScreen(navController: NavController, sessionViewModel: Sessi
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             ProfileContent(
-                nombre = "Laura Encargada",
-                correo = "lencargada@unab.edu.co",
-                rol = "Encargado",
+                nombre = nombre,
+                correo = correo,
+                rol = rol,
                 onLogout = {
                     sessionViewModel.logout()
                     navController.navigate(NavRoutes.Welcome) {

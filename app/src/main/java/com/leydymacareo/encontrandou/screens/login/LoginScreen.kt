@@ -157,13 +157,16 @@ fun LoginScreen(
                                 isLoading = false
                                 emailError = "Correo no registrado"
                             } else {
-                                val role = result.documents[0].getString("rol") ?: ""
+                                val doc = result.documents[0]
+                                val rawRole = doc.getString("rol") ?: ""
+                                val capitalizedRole = rawRole.replaceFirstChar { it.uppercaseChar() }
+                                val name = doc.getString("nombre") ?: ""
                                 auth.signInWithEmailAndPassword(email, password)
                                     .addOnCompleteListener { task ->
                                         isLoading = false
                                         if (task.isSuccessful) {
-                                            sessionViewModel.setUserSession(role)
-                                            val targetRoute = when (role) {
+                                            sessionViewModel.setUserSession(capitalizedRole, name, email)
+                                            val targetRoute = when (rawRole) {
                                                 "usuario" -> NavRoutes.UserHome
                                                 "encargado" -> NavRoutes.EncargadoHome
                                                 else -> NavRoutes.UserHome

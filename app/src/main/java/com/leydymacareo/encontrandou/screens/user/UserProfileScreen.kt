@@ -3,6 +3,7 @@ package com.leydymacareo.encontrandou.screens.user
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -18,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.leydymacareo.encontrandou.viewmodel.SessionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,10 +73,16 @@ fun UserProfileScreen(navController: NavController, sessionViewModel: SessionVie
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
+            val sessionState by sessionViewModel.sessionState.collectAsState()
+
+            val nombre = (sessionState as? SessionState.LoggedIn)?.name ?: "Nombre no disponible"
+            val correo = (sessionState as? SessionState.LoggedIn)?.email ?: "Correo no disponible"
+            val rol = (sessionState as? SessionState.LoggedIn)?.role?.replaceFirstChar { it.uppercase() } ?: "Desconocido"
+
             ProfileContent(
-                nombre = "Juan Pérez",
-                correo = "jperez234@unab.edu.co",
-                rol = "Usuario",
+                nombre = nombre,
+                correo = correo,
+                rol = rol,
                 onLogout = {
                     sessionViewModel.logout()
                     navController.navigate(NavRoutes.Welcome) {

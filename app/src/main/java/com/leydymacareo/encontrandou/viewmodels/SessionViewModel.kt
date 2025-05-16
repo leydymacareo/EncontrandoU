@@ -7,15 +7,20 @@ import kotlinx.coroutines.flow.StateFlow
 sealed class SessionState {
     object Loading : SessionState()
     object LoggedOut : SessionState()
-    data class LoggedIn(val role: String) : SessionState()
+    data class LoggedIn(
+        val role: String,
+        val name: String,
+        val email: String
+    ) : SessionState()
 }
+
 
 class SessionViewModel : ViewModel() {
     private val _sessionState = MutableStateFlow<SessionState>(SessionState.Loading)
     val sessionState: StateFlow<SessionState> = _sessionState
 
-    fun setUserSession(role: String) {
-        _sessionState.value = SessionState.LoggedIn(role)
+    fun setUserSession(role: String, name: String, email: String) {
+        _sessionState.value = SessionState.LoggedIn(role, name, email)
     }
 
     fun logout() {

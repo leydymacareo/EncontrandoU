@@ -33,13 +33,14 @@ class SolicitudViewModel : ViewModel() {
 
     fun generarCodigoSolicitud(): String {
         contadorSolicitudes += 1
-        return "SOL-${contadorSolicitudes.toString().padStart(4, '0')}"
+        val fecha = obtenerFechaCorta()
+        return "SOL-$fecha-${contadorSolicitudes.toString().padStart(4, '0')}" // ✅ BIEN
     }
 
     fun generarCodigoObjeto(): String {
         contadorObjetos += 1
-        val fecha = obtenerFechaCorta() // formato: 160525
-        return "OBJ-$fecha-${contadorObjetos.toString().padStart(4, '0')}"
+        val fecha1 = obtenerFechaCorta() // formato: 160525
+        return "OBJ-$fecha1-${contadorObjetos.toString().padStart(4, '0')}"
     }
 
     private fun obtenerFechaCorta(): String {
