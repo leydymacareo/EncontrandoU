@@ -64,10 +64,12 @@ fun NuevaSolicitudScreen(
                     textoBoton = "Enviar Solicitud",
                     imagenObligatoria = false,
                     onSubmit = { formData, imageUri ->
+                        val correoUsuario = (sessionState as? SessionState.LoggedIn)?.email ?: ""
+                        val sessionId = (sessionState as? SessionState.LoggedIn)?.sessionId ?: ""
                         val nuevaSolicitud = Solicitud(
-                            id = viewModel.generarCodigoSolicitud(),
+                            id = viewModel.generarCodigoSolicitud(sessionId),
                             nombreObjeto = formData.nombreObjeto,
-                            propietario = user.name, // 👈 Aquí sí se garantiza que sea el nombre real
+                            propietario = correoUsuario,
                             fecha = formData.fecha,
                             hora = formData.hora,
                             categoria = formData.categoria,

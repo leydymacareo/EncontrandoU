@@ -1,8 +1,8 @@
 package com.leydymacareo.encontrandou.screens.user
+import android.util.Log
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
-import com.leydymacareo.encontrandou.models.Solicitud
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,18 +27,28 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
+import com.leydymacareo.encontrandou.viewmodel.SessionState
+import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 
 
 @Composable
 fun HomeScreenUsuario(
     navController: NavController,
-    viewModel: SolicitudViewModel = viewModel()
-)
-{
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    viewModel: SolicitudViewModel = viewModel(),
+    sessionViewModel: SessionViewModel
+) {
+    val sessionState by sessionViewModel.sessionState.collectAsState()
+    val correoUsuario = (sessionState as? SessionState.LoggedIn)?.email ?: ""
+
+    // Cargar solicitudes de este usuario
+    LaunchedEffect(sessionState) {
+        viewModel.cargarSolicitudesDeUsuario(correoUsuario)
+    }
 
     val solicitudes by viewModel.solicitudes.collectAsState()
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     val statusIcons = mapOf(
         "Aprobada" to Icons.Default.ThumbUp,
@@ -80,8 +90,7 @@ fun HomeScreenUsuario(
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Nueva solicitud", tint = Color.White)
             }
-        }
-        ,
+        },
         floatingActionButtonPosition = FabPosition.End,
         bottomBar = {
             Surface(
@@ -132,7 +141,6 @@ fun HomeScreenUsuario(
                 }
             }
         }
-
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -161,8 +169,8 @@ fun HomeScreenUsuario(
                 }
             }
 
-
             solicitudes.forEach { solicitud ->
+                val estado = solicitud.estado
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -177,7 +185,6 @@ fun HomeScreenUsuario(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val estado = solicitud.estado
                         if (estado == "En Espera") {
                             Icon(
                                 painter = painterResource(id = R.drawable.accesstime),
@@ -209,7 +216,6 @@ fun HomeScreenUsuario(
                     }
                 }
             }
-
 
             Spacer(modifier = Modifier.height(90.dp))
         }

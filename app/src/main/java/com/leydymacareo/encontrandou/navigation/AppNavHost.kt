@@ -20,6 +20,7 @@ import com.leydymacareo.encontrandou.screens.NuevaSolicitudScreen
 import com.leydymacareo.encontrandou.screens.NuevoObjetoScreen
 import com.leydymacareo.encontrandou.screens.staff.ConfiguracionEncargadoScreen
 import com.leydymacareo.encontrandou.screens.staff.DetalleObjetoScreen
+import com.leydymacareo.encontrandou.screens.staff.DetalleSolicitudEncargadoScreen
 import com.leydymacareo.encontrandou.screens.staff.EncargadoProfileScreen
 import com.leydymacareo.encontrandou.screens.staff.SolicitudesEncargadoScreen
 import com.leydymacareo.encontrandou.screens.user.SolicitudDetailScreen
@@ -66,7 +67,7 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                     }
                 }
                 is SessionState.LoggedIn -> {
-                    HomeScreenUsuario(navController, viewModel = solicitudViewModel)
+                    HomeScreenUsuario(navController, viewModel = solicitudViewModel, sessionViewModel = sessionViewModel)
                 }
             }
         }
@@ -140,7 +141,7 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
         }
 
         composable(NavRoutes.NuevoObjeto) {
-            NuevoObjetoScreen(navController, solicitudViewModel)
+            NuevoObjetoScreen(navController, solicitudViewModel, sessionViewModel)
         }
         composable(
             route = NavRoutes.DetalleObjeto,
@@ -153,6 +154,18 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
                 navController = navController
             )
         }
+        composable(
+            route = NavRoutes.DetalleSolicitudEncargado,
+            arguments = listOf(navArgument("solicitudId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val solicitudId = backStackEntry.arguments?.getString("solicitudId") ?: ""
+            DetalleSolicitudEncargadoScreen(
+                solicitudId = solicitudId,
+                viewModel = solicitudViewModel,
+                navController = navController
+            )
+        }
+
 
     }
 }

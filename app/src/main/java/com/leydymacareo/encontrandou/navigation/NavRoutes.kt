@@ -16,5 +16,7 @@ object NavRoutes {
     const val EncargadoProfile = "perfil_encargado"
     const val NuevoObjeto = "nuevo_objeto"
     const val DetalleObjeto = "detalle_objeto/{objetoId}"
+    const val DetalleSolicitudEncargado = "detalle_solicitud_encargado/{solicitudId}"
+
 
 }

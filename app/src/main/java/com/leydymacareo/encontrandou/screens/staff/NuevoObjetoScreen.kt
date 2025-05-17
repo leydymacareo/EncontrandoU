@@ -10,9 +10,14 @@ import androidx.compose.foundation.layout.*
 import com.leydymacareo.encontrandou.components.FormularioObjeto
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.leydymacareo.encontrandou.components.obtenerFechaActual
 import com.leydymacareo.encontrandou.models.ObjetoEncontrado
+import com.leydymacareo.encontrandou.viewmodel.SessionState
+import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 import java.util.UUID
 
@@ -20,8 +25,13 @@ import java.util.UUID
 @Composable
 fun NuevoObjetoScreen(
     navController: NavController,
-    viewModel: SolicitudViewModel
+    viewModel: SolicitudViewModel,
+    sessionViewModel: SessionViewModel
 ) {
+
+    val sessionState by sessionViewModel.sessionState.collectAsState()
+    val sessionId = (sessionState as? SessionState.LoggedIn)?.sessionId ?: ""
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -40,7 +50,7 @@ fun NuevoObjetoScreen(
             imagenObligatoria = true,
             onSubmit = { formData, imageUri ->
                 val nuevoObjeto = ObjetoEncontrado(
-                    id = viewModel.generarCodigoObjeto(),
+                    id = viewModel.generarCodigoObjeto(sessionId),
                     nombre = formData.nombreObjeto,
                     fecha = obtenerFechaActual(),
                     imagenUri = imageUri?.toString(),
