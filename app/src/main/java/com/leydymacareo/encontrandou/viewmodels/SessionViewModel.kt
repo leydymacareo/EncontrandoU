@@ -16,8 +16,6 @@ sealed class SessionState {
 }
 
 
-
-
 class SessionViewModel : ViewModel() {
     private val _sessionState = MutableStateFlow<SessionState>(SessionState.Loading)
     val sessionState: StateFlow<SessionState> = _sessionState

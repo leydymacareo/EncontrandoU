@@ -165,7 +165,7 @@ fun HomeScreenUsuario(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .clickable {
-                            navController.navigate("detalle_solicitud/${solicitud.id}/usuario")
+                            navController.navigate("detalle_solicitud/${solicitud.key}/usuario")
                         },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)

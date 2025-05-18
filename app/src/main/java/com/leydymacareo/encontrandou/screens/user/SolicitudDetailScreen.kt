@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.user
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,6 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +35,7 @@ fun SolicitudDetailScreen(
     viewModel: SolicitudViewModel,
     navController: NavController
 ) {
+    Log.d("SolicitudDetailScreen", "solicitudId: $solicitudId")
     val solicitud = viewModel.obtenerSolicitudPorId(solicitudId)
 
     if (solicitud == null) {
@@ -129,16 +135,45 @@ fun SolicitudDetailScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        Button(
-                            onClick = { /* TODO: Cancelar solicitud */ },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text("Cancelar Solicitud", color = Color.White)
+                        if (solicitud.estado == EstadoSolicitud.PENDIENTE) {
+                            var showDialog by remember { mutableStateOf(false) }
+
+                            Button(
+                                onClick = { showDialog = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text("Cancelar Solicitud", color = Color.White)
+                            }
+
+                            if (showDialog) {
+                                AlertDialog(
+                                    onDismissRequest = { showDialog = false },
+                                    title = { Text("¿Cancelar solicitud?") },
+                                    text = { Text("¿Estás seguro de que deseas cancelar esta solicitud?") },
+                                    confirmButton = {
+                                        TextButton(
+                                            onClick = {
+                                                viewModel.cancelarSolicitud(solicitud)
+                                                showDialog = false
+                                                navController.popBackStack()
+                                            }
+                                        ) {
+                                            Text("Sí")
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showDialog = false }) {
+                                            Text("No")
+                                        }
+                                    }
+                                )
+                            }
                         }
+
                     }
                 }
             }

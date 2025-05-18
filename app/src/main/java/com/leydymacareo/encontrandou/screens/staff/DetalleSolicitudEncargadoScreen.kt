@@ -33,30 +33,29 @@ fun DetalleSolicitudEncargadoScreen(
 ) {
     val solicitudes by viewModel.solicitudes.collectAsState()
     val objetos by viewModel.objetosEncontrados.collectAsState()
-    var showConfirmDialog by remember { mutableStateOf(false) }
+    var showConfirmEntrega by remember { mutableStateOf(false) }
+    var showConfirmRechazo by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if (solicitudes.isEmpty()) {
-            viewModel.cargarSolicitudesDesdeFirestore()
-        }
-        if (objetos.isEmpty()) {
-            viewModel.cargarObjetosDesdeFirestore()
-        }
+        if (solicitudes.isEmpty()) viewModel.cargarSolicitudesDesdeFirestore()
+        if (objetos.isEmpty()) viewModel.cargarObjetosDesdeFirestore()
     }
 
     val solicitud = solicitudes.find { it.id == solicitudId }
 
     if (solicitud == null) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 100.dp),
+            modifier = Modifier.fillMaxSize().padding(top = 100.dp),
             contentAlignment = Alignment.TopCenter
         ) {
             CircularProgressIndicator(color = Color(0xFF00AFF1))
         }
         return
     }
+
+    val puedeAsignar = solicitud.estado.name == "PENDIENTE"
+    val puedeEntregar = solicitud.estado.name == "APROBADA"
+    val disponibles = objetos.filter { it.estado.name == "DISPONIBLE" }
 
     Scaffold(
         topBar = {
@@ -94,6 +93,7 @@ fun DetalleSolicitudEncargadoScreen(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // CARD de solicitud
                 Card(
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF9EC)),
@@ -130,7 +130,10 @@ fun DetalleSolicitudEncargadoScreen(
                         InfoRow("Fecha Aproximada", solicitud.fecha)
                         InfoRow("Hora Aproximada", solicitud.hora)
                         InfoRow("Categoría", solicitud.categoria)
-                        InfoRow("Marca o Modelo", if (solicitud.descripcion.isBlank()) "No especificado" else solicitud.descripcion)
+                        InfoRow(
+                            "Marca o Modelo",
+                            if (solicitud.descripcion.isBlank()) "No especificado" else solicitud.descripcion
+                        )
                         InfoRow("Color Principal", solicitud.color)
                         InfoRow("Descripción Adicional", solicitud.descripcion)
                     }
@@ -138,9 +141,10 @@ fun DetalleSolicitudEncargadoScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (solicitud.estado.name == "APROBADA") {
+                // ✅ Botón para entregar si ya está aprobada
+                if (puedeEntregar) {
                     Button(
-                        onClick = { showConfirmDialog = true },
+                        onClick = { showConfirmEntrega = true },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
@@ -149,13 +153,28 @@ fun DetalleSolicitudEncargadoScreen(
                     ) {
                         Text("Marcar como Entregada", color = Color.White)
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // ✅ Botón para rechazar si está pendiente
+                if (puedeAsignar) {
+                    Button(
+                        onClick = { showConfirmRechazo = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text("Rechazar Solicitud", color = Color.White)
+                    }
 
-                val disponibles = objetos.filter { it.estado.name == "DISPONIBLE" }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
 
-                if (disponibles.isNotEmpty()) {
+                // ✅ Lista de objetos solo si aún es asignable
+                if (puedeAsignar && disponibles.isNotEmpty()) {
                     Text(
                         text = "Objetos disponibles para asignar:",
                         style = MaterialTheme.typography.titleMedium,
@@ -180,41 +199,63 @@ fun DetalleSolicitudEncargadoScreen(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(text = objeto.nombre, fontWeight = FontWeight.Bold)
-                                Text(text = "Categoría: ${objeto.categoria}")
-                                Text(text = "Color: ${objeto.color}")
-                                Text(text = "Lugar: ${objeto.lugar}")
+                                Text("Categoría: ${objeto.categoria}")
+                                Text("Color: ${objeto.color}")
+                                Text("Lugar: ${objeto.lugar}")
                             }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(90.dp))
+                    Spacer(modifier = Modifier.height(90.dp))
+                }
             }
         }
     )
 
-    // Diálogo de confirmación
-    if (showConfirmDialog) {
+    // ✅ Dialogo de entrega
+    if (showConfirmEntrega) {
         AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
+            onDismissRequest = { showConfirmEntrega = false },
             title = { Text("¿Confirmar entrega?") },
             text = { Text("¿Estás seguro de que quieres marcar esta solicitud como entregada?") },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.entregarSolicitud(solicitud)
-                        showConfirmDialog = false
-                        navController.popBackStack()
-                    }
-                ) {
+                TextButton(onClick = {
+                    viewModel.entregarSolicitud(solicitud)
+                    showConfirmEntrega = false
+                    navController.popBackStack()
+                }) {
                     Text("Sí")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showConfirmDialog = false }) {
+                TextButton(onClick = { showConfirmEntrega = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // ✅ Dialogo de rechazo
+    if (showConfirmRechazo) {
+        AlertDialog(
+            onDismissRequest = { showConfirmRechazo = false },
+            title = { Text("¿Rechazar solicitud?") },
+            text = { Text("¿Estás seguro de que quieres rechazar esta solicitud?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.rechazarSolicitud(solicitud)
+                    showConfirmRechazo = false
+                    navController.popBackStack()
+                }) {
+                    Text("Sí, rechazar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmRechazo = false }) {
                     Text("Cancelar")
                 }
             }
         )
     }
 }
+

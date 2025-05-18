@@ -15,13 +15,14 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun EstadoBadge(estado: String) {
     val (color, texto, icono) = when (estado.uppercase()) {
-        "PENDIENTE"     -> Triple(Color.Gray, "Pendiente", "🕒")
-        "APROBADA"      -> Triple(Color(0xFF4CAF50), "Aprobada", "✅")
-        "RECHAZADA"     -> Triple(Color.Red, "Rechazada", "❌")
-        "ENTREGADA"     -> Triple(Color(0xFF2196F3), "Entregada", "📦")
-        "CANCELADA"     -> Triple(Color.DarkGray, "Cancelada", "🚫")
-        "DISPONIBLE"    -> Triple(Color(0xFF4CAF50), "Disponible", "🟢")
-        "ASIGNADO"      -> Triple(Color(0xFFFF9800), "Asignado", "📌")
+        "PENDIENTE"     -> Triple(Color(0xFFFEF3E2), "Pendiente", "⏳")
+        "APROBADA"      -> Triple(Color(0xFFDDF6D2), "Aprobada", "✅")
+        "RECHAZADA"     -> Triple(Color(0xFFFFD5D5), "Rechazada", "❌")
+        "ENTREGADA" -> Triple(Color(0xFFAFDDFF), "Entregada", "📬")
+        "CANCELADA"     -> Triple(Color.LightGray, "Cancelada", "🚫")
+        "DISPONIBLE" -> Triple(Color(0xFFFEF3E2), "Disponible", "⭐")
+        "ASIGNADO" -> Triple(Color(0xFFDDF6D2), "Asignado", "📍")
+        "ENTREGADO" -> Triple(Color(0xFFAFDDFF), "Entregado", "📬")
         "RETIRADO"      -> Triple(Color.Gray, "Retirado", "📤")
         else            -> Triple(Color.LightGray, estado.capitalize(), "❓")
     }
@@ -39,7 +40,7 @@ fun EstadoBadge(estado: String) {
         )
         Text(
             text = texto,
-            color = Color.White,
+            color = Color.Black,
             style = MaterialTheme.typography.labelSmall
         )
     }

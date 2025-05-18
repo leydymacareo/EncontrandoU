@@ -349,6 +349,24 @@ class SolicitudViewModel : ViewModel() {
         return objetosEncontrados.value.find { it.id == id || it.key == id }
     }
 
+    fun cancelarSolicitud(solicitud: Solicitud) {
+        val solicitudRef = db.collection("solicitudes").document(solicitud.key)
+        solicitud.estado = EstadoSolicitud.CANCELADA
+
+        solicitudRef.set(solicitud)
+            .addOnSuccessListener {
+                Log.d("SolicitudViewModel", "Solicitud cancelada correctamente")
+                // Actualiza la lista en memoria
+                _solicitudes.value = _solicitudes.value.map {
+                    if (it.key == solicitud.key) solicitud else it
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("SolicitudViewModel", "Error al cancelar solicitud", e)
+            }
+    }
+
+
 
 
 }
