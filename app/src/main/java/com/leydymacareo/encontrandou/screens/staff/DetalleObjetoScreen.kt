@@ -111,7 +111,46 @@ fun DetalleObjetoScreen(
                     InfoRow("Color Principal", objeto.color)
                     InfoRow("Marca o Modelo", objeto.marca?.ifBlank { "No especificado" } ?: "No especificado")
                     InfoRow("Descripción Adicional", objeto.descripcion.ifBlank { "Sin descripción adicional." })
+
+                    if (objeto.estado.name == "ASIGNADO" || objeto.estado.name == "ENTREGADO") {
+                        val solicitudAsignada = viewModel.getSolicitudById(objeto.solicitudAsignadaId ?: "")
+
+                        if (solicitudAsignada != null) {
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            val cardColor = if (objeto.estado.name == "ENTREGADO") Color(0xFFAFDDFF) else Color(0xFFDDF6D2)
+                            val titleText = if (objeto.estado.name == "ENTREGADO") "Entregado a" else "Asignado a"
+                            val titleColor = if (objeto.estado.name == "ENTREGADO") Color(0xFF1565C0) else Color(0xFF2E7D32)
+
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = cardColor),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(20.dp)) {
+                                    Text(
+                                        text = titleText,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = titleColor
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    InfoRow("Correo del Propietario", solicitudAsignada.propietario)
+                                    InfoRow("Código de la Solicitud", solicitudAsignada.id)
+                                }
+                            }
+                        }
+                    }
+
+
+
+
+
                 }
+
+
             }
 
             Spacer(modifier = Modifier.height(24.dp))

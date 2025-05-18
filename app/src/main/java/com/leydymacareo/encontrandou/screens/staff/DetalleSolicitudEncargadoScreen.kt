@@ -100,7 +100,14 @@ fun DetalleSolicitudEncargadoScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        EstadoBadge(estado = solicitud.estado.name)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            EstadoBadge(estado = solicitud.estado.name)
+                        }
+
 
                         Spacer(modifier = Modifier.height(20.dp))
 
@@ -136,7 +143,47 @@ fun DetalleSolicitudEncargadoScreen(
                         )
                         InfoRow("Color Principal", solicitud.color)
                         InfoRow("Descripción Adicional", solicitud.descripcion)
+
+                        if (solicitud.estado.name == "APROBADA" || solicitud.estado.name == "ENTREGADA") {
+                            val objetoAsignado = solicitud.objetoId?.let { id ->
+                                objetos.find { it.key == id || it.id == id }
+                            }
+
+                            if (objetoAsignado != null) {
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                val cardColor = if (solicitud.estado.name == "ENTREGADA") Color(0xFFAFDDFF) else Color(0xFFDDF6D2)
+                                val titleText = if (solicitud.estado.name == "ENTREGADA") "Objeto Entregado" else "Objeto Asignado"
+                                val titleColor = if (solicitud.estado.name == "ENTREGADA") Color(0xFF1565C0) else Color(0xFF2E7D32)
+
+                                Card(
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(containerColor = cardColor),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(modifier = Modifier.padding(20.dp)) {
+                                        Text(
+                                            text = titleText,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = titleColor
+                                        )
+
+                                        Spacer(modifier = Modifier.height(12.dp))
+
+                                        InfoRow("Nombre del Objeto", objetoAsignado.nombre)
+                                        InfoRow("Código del Objeto", objetoAsignado.id)
+                                        InfoRow("Categoría", objetoAsignado.categoria)
+                                        InfoRow("Color", objetoAsignado.color)
+                                    }
+                                }
+                            }
+                        }
+
+
                     }
+
+
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

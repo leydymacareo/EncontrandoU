@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.staff
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -40,6 +41,7 @@ fun EncargadoProfileScreen(navController: NavController, sessionViewModel: Sessi
                 color = Color.White,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Color(0xFFF5F5F5))
                     .height(70.dp)
             ) {
                 Row(
