@@ -43,13 +43,9 @@ class SolicitudViewModel : ViewModel {
     fun agregarObjeto(objeto: ObjetoEncontrado) {
         _objetosEncontrados.value = _objetosEncontrados.value + objeto
 
-        // 🔥 Guardar en Firestore
-        db.collection("objetos")
-            .document(objeto.id)
-            .set(objeto)
 
         Log.d("SolicitudViewModel", "agregarObjeto: ${objeto.id}");
-        // 🔥 Guardar en Firestore
+        //  Guardar en Firestore
         db.collection("objetos")
             .add(objeto).addOnSuccessListener { documentReference ->
                 Log.d("SolicitudViewModel::agregarObjeto", "DocumentSnapshot written: ${documentReference.id}");
@@ -88,7 +84,9 @@ class SolicitudViewModel : ViewModel {
             .get()
             .addOnSuccessListener { result ->
                 val listaSolicitudes = result.mapNotNull { doc ->
-                    doc.toObject(Solicitud::class.java)
+                    val solicitud = doc.toObject(Solicitud::class.java)
+                    solicitud.key = doc.reference.id;
+                    solicitud
                 }
                 _solicitudes.value = listaSolicitudes
             }
@@ -99,16 +97,26 @@ class SolicitudViewModel : ViewModel {
     }
 
     fun cargarObjetosDesdeFirestore() {
+        Log.d("SolucitudViewModel", "Start cargarObjetosDesdeFirestore");
         db.collection("objetos")
+
             .get()
             .addOnSuccessListener { result ->
+
                 val listaObjetos = result.mapNotNull { doc ->
-                    doc.toObject(ObjetoEncontrado::class.java)
+                    val objeto = doc.toObject(ObjetoEncontrado::class.java)
+                    objeto.key = doc.reference.id;
+                    objeto
                 }
-                _objetosEncontrados.value = listaObjetos
+
+                Log.d("SolicutedViewModel",  listaObjetos.toString());
+                _objetosEncontrados.value = listaObjetos;
+                Log.d("SolucitudViewModel", "Complete cargarObjetosDesdeFirestore");
             }
             .addOnFailureListener {
+                e ->
                 // Puedes loguear el error aquí si quieres
+                Log.w("SolucitudViewModel", "Error cargarObjetosDesdeFirestore", e)
             }
     }
 
@@ -119,7 +127,9 @@ class SolicitudViewModel : ViewModel {
             .get()
             .addOnSuccessListener { result ->
                 val lista = result.mapNotNull { doc ->
-                    doc.toObject(Solicitud::class.java)
+                    val solicitud = doc.toObject(Solicitud::class.java)
+                    solicitud.key = doc.reference.id;
+                    solicitud
                 }
                 _solicitudes.value = lista
                 Log.d("SolucitudViewModel", "Complete cargarSolicitudesDeUsuario $email");

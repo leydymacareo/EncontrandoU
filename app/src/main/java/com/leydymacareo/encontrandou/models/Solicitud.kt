@@ -1,6 +1,7 @@
 package com.leydymacareo.encontrandou.models
 
 data class Solicitud(
+    var key: String = "",
     val id: String = "",
     val nombreObjeto: String = "",
     val propietario: String = "",

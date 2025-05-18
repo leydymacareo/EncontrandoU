@@ -55,6 +55,12 @@ fun EncargadoHomeScreen(
         "Entregado" to Color(0xFF1565C0)
     )
 
+    // Cargar objetos de firebase
+    LaunchedEffect(sessionState) {
+        viewModel.cargarObjetosDesdeFirestore()
+    }
+
+
     Scaffold(
         topBar = {
             Column(
