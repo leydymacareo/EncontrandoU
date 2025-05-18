@@ -20,6 +20,7 @@ import com.leydymacareo.encontrandou.screens.NuevaSolicitudScreen
 import com.leydymacareo.encontrandou.screens.NuevoObjetoScreen
 import com.leydymacareo.encontrandou.screens.staff.ConfiguracionEncargadoScreen
 import com.leydymacareo.encontrandou.screens.staff.DetalleObjetoScreen
+import com.leydymacareo.encontrandou.screens.staff.DetalleObjetoSeleccionableScreen
 import com.leydymacareo.encontrandou.screens.staff.DetalleSolicitudEncargadoScreen
 import com.leydymacareo.encontrandou.screens.staff.EncargadoProfileScreen
 import com.leydymacareo.encontrandou.screens.staff.SolicitudesEncargadoScreen
@@ -166,6 +167,23 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
             )
         }
 
+        composable(
+            route = NavRoutes.DetalleObjetoSeleccionable,
+            arguments = listOf(
+                navArgument("solicitudId") { type = NavType.StringType },
+                navArgument("objetoId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val solicitudId = backStackEntry.arguments?.getString("solicitudId") ?: ""
+            val objetoId = backStackEntry.arguments?.getString("objetoId") ?: ""
+            DetalleObjetoSeleccionableScreen(
+                solicitudId = solicitudId,
+                objetoId = objetoId,
+                navController = navController,
+                viewModel = solicitudViewModel
+            )
+
+        }
 
     }
 }

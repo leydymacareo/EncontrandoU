@@ -17,6 +17,8 @@ object NavRoutes {
     const val NuevoObjeto = "nuevo_objeto"
     const val DetalleObjeto = "detalle_objeto/{objetoId}"
     const val DetalleSolicitudEncargado = "detalle_solicitud_encargado/{solicitudId}"
+    const val DetalleObjetoSeleccionable = "detalle_objeto_para_asignar/{solicitudId}/{objetoId}"
 
-
+    fun detalleObjetoParaAsignarRoute(solicitudId: String, objetoId: String) =
+        "detalle_objeto_para_asignar/$solicitudId/$objetoId"
 }

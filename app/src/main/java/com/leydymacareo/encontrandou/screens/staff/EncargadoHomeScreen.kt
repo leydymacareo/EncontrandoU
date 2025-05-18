@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import com.leydymacareo.encontrandou.NavRoutes
+import com.leydymacareo.encontrandou.components.EstadoBadge
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 import com.leydymacareo.encontrandou.models.ObjetoEncontrado
 import com.leydymacareo.encontrandou.viewmodel.SessionState
@@ -202,12 +203,7 @@ fun EncargadoHomeScreen(
                             Column {
                                 Text(text = objeto.nombre, fontWeight = FontWeight.Bold, color = Color.Black)
                                 Text(text = objeto.fecha, fontSize = 13.sp, color = Color.Black)
-                                Text(
-                                    text = objeto.estado,
-                                    color = statusColors[objeto.estado] ?: Color.Gray,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                                EstadoBadge(estado = objeto.estado.name)
                             }
                         }
                     }

@@ -29,6 +29,8 @@ import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.viewmodel.SessionState
 import com.leydymacareo.encontrandou.viewmodel.SessionViewModel
+import com.leydymacareo.encontrandou.components.EstadoBadge
+
 
 
 @Composable
@@ -49,19 +51,6 @@ fun HomeScreenUsuario(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
-    val statusIcons = mapOf(
-        "Aprobada" to Icons.Default.ThumbUp,
-        "Entregada" to Icons.Default.Check,
-        "Rechazada" to Icons.Default.Close
-    )
-
-    val statusColors = mapOf(
-        "En Espera" to Color(0xFFFFA000),
-        "Aprobada" to Color(0xFF2E7D32),
-        "Entregada" to Color(0xFF1565C0),
-        "Rechazada" to Color(0xFFD32F2F)
-    )
 
     Scaffold(
         topBar = {
@@ -185,33 +174,10 @@ fun HomeScreenUsuario(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (estado == "En Espera") {
-                            Icon(
-                                painter = painterResource(id = R.drawable.accesstime),
-                                contentDescription = estado,
-                                tint = statusColors[estado] ?: Color.Gray,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = statusIcons[estado] ?: Icons.Default.Info,
-                                contentDescription = estado,
-                                tint = statusColors[estado] ?: Color.Gray,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
                         Column {
                             Text(text = solicitud.nombreObjeto, fontWeight = FontWeight.Bold, color = Color.Black)
                             Text(text = solicitud.fecha, color = Color.Black, fontSize = 13.sp)
-                            Text(
-                                text = solicitud.estado,
-                                color = statusColors[estado] ?: Color.Gray,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            EstadoBadge(estado = solicitud.estado.name)
                         }
                     }
                 }

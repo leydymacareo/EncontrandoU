@@ -23,6 +23,8 @@ import coil.compose.AsyncImage
 import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 import androidx.navigation.NavController
+import com.leydymacareo.encontrandou.components.EstadoBadge
+
 
 @Composable
 fun DetalleObjetoScreen(
@@ -73,23 +75,7 @@ fun DetalleObjetoScreen(
                     modifier = Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Estado
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFFFEEC5))
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.accesstime),
-                            contentDescription = null,
-                            tint = Color(0xFF5C5C5C),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(objeto.estado, fontWeight = FontWeight.SemiBold)
-                    }
+                    EstadoBadge(estado = objeto.estado.name)
 
                     Spacer(modifier = Modifier.height(20.dp))
 

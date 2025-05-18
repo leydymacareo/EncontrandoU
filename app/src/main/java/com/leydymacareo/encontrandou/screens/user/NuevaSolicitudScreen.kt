@@ -74,7 +74,7 @@ fun NuevaSolicitudScreen(
                             hora = formData.hora,
                             categoria = formData.categoria,
                             color = formData.color,
-                            estado = "En Espera",
+                            estado = EstadoSolicitud.PENDIENTE,
                             lugar = formData.lugar,
                             descripcion = formData.descripcion,
                             imagenUri = imageUri?.toString()

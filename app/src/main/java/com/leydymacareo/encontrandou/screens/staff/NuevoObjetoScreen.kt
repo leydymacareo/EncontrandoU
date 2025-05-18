@@ -53,6 +53,7 @@ fun NuevoObjetoScreen(
                     id = viewModel.generarCodigoObjeto(sessionId),
                     nombre = formData.nombreObjeto,
                     fecha = obtenerFechaActual(),
+                    estado = EstadoObjeto.DISPONIBLE,
                     imagenUri = imageUri?.toString(),
                     descripcion = formData.descripcion,
                     categoria = formData.categoria,

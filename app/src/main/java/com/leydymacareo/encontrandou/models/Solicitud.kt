@@ -1,5 +1,7 @@
 package com.leydymacareo.encontrandou.models
 
+import EstadoSolicitud
+
 data class Solicitud(
     var key: String = "",
     val id: String = "",
@@ -11,7 +13,9 @@ data class Solicitud(
     val color: String = "",
     val lugar: String = "",
     val descripcion: String = "",
-    val estado: String = "",
+    var estado: EstadoSolicitud = EstadoSolicitud.PENDIENTE,
     val imagenUri: String? = null,
-    val sessionId: String = ""
+    val sessionId: String = "",
+    var objetoId: String? = null,
+    var codigoObjetoAsignado: String? = null
 )

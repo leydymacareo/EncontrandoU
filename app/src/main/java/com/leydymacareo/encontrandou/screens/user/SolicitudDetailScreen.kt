@@ -1,7 +1,6 @@
 package com.leydymacareo.encontrandou.screens.user
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,9 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.leydymacareo.encontrandou.components.EstadoBadge
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 
 @Composable
@@ -31,7 +30,7 @@ fun SolicitudDetailScreen(
     viewModel: SolicitudViewModel,
     navController: NavController
 ) {
-    val solicitud = viewModel.obtenerPorId(solicitudId)
+    val solicitud = viewModel.obtenerSolicitudPorId(solicitudId)
 
     if (solicitud == null) {
         Text("No se encontró la solicitud.")
@@ -79,20 +78,15 @@ fun SolicitudDetailScreen(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
 
-                        Row(
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(Color(0xFFFCE7B2))
-                                .padding(horizontal = 16.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "🕒 ${solicitud.estado}",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Medium
-                            )
+                            EstadoBadge(estado = solicitud.estado.name)
                         }
+
+
                         Spacer(modifier = Modifier.height(20.dp))
 
                         solicitud.imagenUri?.let { uri ->

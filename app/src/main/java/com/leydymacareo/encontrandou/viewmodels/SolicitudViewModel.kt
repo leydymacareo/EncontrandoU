@@ -1,5 +1,7 @@
 package com.leydymacareo.encontrandou.viewmodels
 
+import EstadoObjeto
+import EstadoSolicitud
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
 import java.util.*
 
-class SolicitudViewModel : ViewModel {
+class SolicitudViewModel : ViewModel() {
 
     private val _solicitudes = MutableStateFlow<List<Solicitud>>(emptyList())
     val solicitudes: StateFlow<List<Solicitud>> = _solicitudes
@@ -23,43 +25,43 @@ class SolicitudViewModel : ViewModel {
 
     private val db = FirebaseFirestore.getInstance()
 
-    constructor() {
-        Log.d("SolucitudViewModel", "Construct");
+    init {
+        Log.d("SolicitudViewModel", "SolicitudViewModel iniciado")
     }
 
     fun agregarSolicitud(solicitud: Solicitud) {
         _solicitudes.value = _solicitudes.value + solicitud
-        Log.d("SolicitudViewModel", "agregarSolicitud: ${solicitud.id}");
-        // 🔥 Guardar en Firestore
         db.collection("solicitudes")
-            .add(solicitud).addOnSuccessListener { documentReference ->
-                Log.d("SolicitudViewModel::agregarSolicitud", "DocumentSnapshot written: ${documentReference.id}");
+            .add(solicitud)
+            .addOnSuccessListener { docRef ->
+                Log.d("SolicitudViewModel", "Solicitud guardada: ${docRef.id}")
             }
             .addOnFailureListener { e ->
-                Log.w("SolicitudViewModel::agregarSolicitud", "Error adding document", e)
+                Log.w("SolicitudViewModel", "Error al guardar solicitud", e)
             }
     }
 
     fun agregarObjeto(objeto: ObjetoEncontrado) {
         _objetosEncontrados.value = _objetosEncontrados.value + objeto
-
-
-        Log.d("SolicitudViewModel", "agregarObjeto: ${objeto.id}");
-        //  Guardar en Firestore
         db.collection("objetos")
-            .add(objeto).addOnSuccessListener { documentReference ->
-                Log.d("SolicitudViewModel::agregarObjeto", "DocumentSnapshot written: ${documentReference.id}");
+            .add(objeto)
+            .addOnSuccessListener { docRef ->
+                Log.d("SolicitudViewModel", "Objeto guardado: ${docRef.id}")
             }
             .addOnFailureListener { e ->
-                Log.w("SolicitudViewModel::agregarObjeto", "Error adding document", e)
+                Log.w("SolicitudViewModel", "Error al guardar objeto", e)
             }
     }
 
-    fun obtenerPorId(id: String): Solicitud? {
-        return _solicitudes.value.find { it.id == id }
+    fun obtenerSolicitudPorId(key: String): Solicitud? {
+        Log.d("SolicitudViewModel", "obtenerSolicitudPorId: $key");
+        return _solicitudes.value.find { it.key == key }
     }
 
-
+    fun obtenerObjectoPorId(key: String): ObjetoEncontrado? {
+        Log.d("SolicitudViewModel", "obtenerObjectoPorId: $key");
+        return _objetosEncontrados.value.find { it.key == key }
+    }
 
     fun generarCodigoSolicitud(sessionId: String): String {
         contadorSolicitudes += 1
@@ -79,64 +81,274 @@ class SolicitudViewModel : ViewModel {
     }
 
     fun cargarSolicitudesDesdeFirestore() {
-        Log.d("SolucitudViewModel", "cargarSolicitudesDesdeFirestore");
         db.collection("solicitudes")
             .get()
             .addOnSuccessListener { result ->
-                val listaSolicitudes = result.mapNotNull { doc ->
-                    val solicitud = doc.toObject(Solicitud::class.java)
-                    solicitud.key = doc.reference.id;
-                    solicitud
+                val lista = result.mapNotNull { doc ->
+                    try {
+                        val estado = safeEstadoSolicitud(doc.getString("estado") ?: "")
+                        Solicitud(
+                            key = doc.id,
+                            id = doc.getString("id") ?: "",
+                            nombreObjeto = doc.getString("nombreObjeto") ?: "",
+                            propietario = doc.getString("propietario") ?: "",
+                            fecha = doc.getString("fecha") ?: "",
+                            hora = doc.getString("hora") ?: "",
+                            categoria = doc.getString("categoria") ?: "",
+                            color = doc.getString("color") ?: "",
+                            lugar = doc.getString("lugar") ?: "",
+                            descripcion = doc.getString("descripcion") ?: "",
+                            estado = estado,
+                            imagenUri = doc.getString("imagenUri"),
+                            sessionId = doc.getString("sessionId") ?: "",
+                            objetoId = doc.getString("objetoId"),
+                            codigoObjetoAsignado = doc.getString("codigoObjetoAsignado")
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
                 }
-                _solicitudes.value = listaSolicitudes
+                _solicitudes.value = lista
             }
-            .addOnFailureListener {e ->
-                // Puedes loguear el error aquí si quieres
-                Log.w("SolucitudViewModel", "Error cargarSolicitudesDesdeFirestore", e)
+            .addOnFailureListener { e ->
+                Log.w("SolicitudViewModel", "Error al cargar solicitudes", e)
             }
     }
 
     fun cargarObjetosDesdeFirestore() {
-        Log.d("SolucitudViewModel", "Start cargarObjetosDesdeFirestore");
         db.collection("objetos")
-
             .get()
             .addOnSuccessListener { result ->
+                val lista = result.mapNotNull { doc ->
+                    try {
+                        val estado = safeEstadoObjeto(doc.getString("estado") ?: "")
+                        ObjetoEncontrado(
+                            key = doc.id,
+                            id = doc.getString("id") ?: "",
+                            nombre = doc.getString("nombre") ?: "",
+                            fecha = doc.getString("fecha") ?: "",
+                            estado = estado,
+                            imagenUri = doc.getString("imagenUri"),
+                            descripcion = doc.getString("descripcion") ?: "",
+                            categoria = doc.getString("categoria") ?: "",
+                            color = doc.getString("color") ?: "",
+                            marca = doc.getString("marca"),
+                            lugar = doc.getString("lugar") ?: "",
+                            fechaAproximada = doc.getString("fechaAproximada") ?: "",
+                            horaAproximada = doc.getString("horaAproximada") ?: "",
+                            solicitudAsignadaId = doc.getString("solicitudAsignadaId"),
+                            codigoSolicitudAsignada = doc.getString("codigoSolicitudAsignada")
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                _objetosEncontrados.value = lista
+            }
+            .addOnFailureListener { e ->
+                Log.w("SolicitudViewModel", "Error al cargar objetos", e)
+            }
+    }
 
-                val listaObjetos = result.mapNotNull { doc ->
-                    val objeto = doc.toObject(ObjetoEncontrado::class.java)
-                    objeto.key = doc.reference.id;
-                    objeto
+    fun cargarObjetoDesdeFirestore(id: String) {
+        db.collection("objetos").document(id)
+            .get()
+            .addOnSuccessListener { result ->
+                try {
+                    val estado = safeEstadoObjeto(result.getString("estado") ?: "")
+                    ObjetoEncontrado(
+                        key = result.id,
+                        id = result.getString("id") ?: "",
+                        nombre = result.getString("nombre") ?: "",
+                        fecha = result.getString("fecha") ?: "",
+                        estado = estado,
+                        imagenUri = result.getString("imagenUri"),
+                        descripcion = result.getString("descripcion") ?: "",
+                        categoria = result.getString("categoria") ?: "",
+                        color = result.getString("color") ?: "",
+                        marca = result.getString("marca"),
+                        lugar = result.getString("lugar") ?: "",
+                        fechaAproximada = result.getString("fechaAproximada") ?: "",
+                        horaAproximada = result.getString("horaAproximada") ?: "",
+                        solicitudAsignadaId = result.getString("solicitudAsignadaId"),
+                        codigoSolicitudAsignada = result.getString("codigoSolicitudAsignada")
+                    )
+                } catch (e: Exception) {
+                    null
                 }
 
-                Log.d("SolicutedViewModel",  listaObjetos.toString());
-                _objetosEncontrados.value = listaObjetos;
-                Log.d("SolucitudViewModel", "Complete cargarObjetosDesdeFirestore");
             }
-            .addOnFailureListener {
-                e ->
-                // Puedes loguear el error aquí si quieres
-                Log.w("SolucitudViewModel", "Error cargarObjetosDesdeFirestore", e)
+            .addOnFailureListener { e ->
+                Log.w("SolicitudViewModel", "Error al cargar objetos", e)
             }
     }
 
     fun cargarSolicitudesDeUsuario(email: String) {
-        Log.d("SolucitudViewModel", "Start cargarSolicitudesDeUsuario $email");
         db.collection("solicitudes")
-            .whereEqualTo("propietario", email) // 👈 Este campo debe contener el email
+            .whereEqualTo("propietario", email)
             .get()
             .addOnSuccessListener { result ->
                 val lista = result.mapNotNull { doc ->
-                    val solicitud = doc.toObject(Solicitud::class.java)
-                    solicitud.key = doc.reference.id;
-                    solicitud
+                    try {
+                        val estado = safeEstadoSolicitud(doc.getString("estado") ?: "")
+                        Solicitud(
+                            key = doc.id,
+                            id = doc.getString("id") ?: "",
+                            nombreObjeto = doc.getString("nombreObjeto") ?: "",
+                            propietario = doc.getString("propietario") ?: "",
+                            fecha = doc.getString("fecha") ?: "",
+                            hora = doc.getString("hora") ?: "",
+                            categoria = doc.getString("categoria") ?: "",
+                            color = doc.getString("color") ?: "",
+                            lugar = doc.getString("lugar") ?: "",
+                            descripcion = doc.getString("descripcion") ?: "",
+                            estado = estado,
+                            imagenUri = doc.getString("imagenUri"),
+                            sessionId = doc.getString("sessionId") ?: "",
+                            objetoId = doc.getString("objetoId"),
+                            codigoObjetoAsignado = doc.getString("codigoObjetoAsignado")
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
                 }
                 _solicitudes.value = lista
-                Log.d("SolucitudViewModel", "Complete cargarSolicitudesDeUsuario $email");
             }
             .addOnFailureListener { e ->
-                // Puedes loguear el error aquí si quieres
-                Log.w("SolucitudViewModel", "Error cargarSolicitudesDeUsuario", e)
+                Log.w("SolicitudViewModel", "Error al cargar solicitudes del usuario", e)
             }
     }
+
+    // ✅ FUNCIONES DE ENUM SEGURO
+    private fun safeEstadoSolicitud(value: String): EstadoSolicitud =
+        try {
+            EstadoSolicitud.valueOf(value)
+        } catch (e: Exception) {
+            EstadoSolicitud.PENDIENTE
+        }
+
+    private fun safeEstadoObjeto(value: String): EstadoObjeto =
+        try {
+            EstadoObjeto.valueOf(value)
+        } catch (e: Exception) {
+            EstadoObjeto.DISPONIBLE
+        }
+
+    // ✅ NUEVO: aprobar solicitud y vincular objeto
+    fun aprobarSolicitudYVincularObjeto(solicitud: Solicitud, objeto: ObjetoEncontrado) {
+        val solicitudRef = db.collection("solicitudes").document(solicitud.key)
+        val objetoRef = db.collection("objetos").document(objeto.key)
+
+        solicitud.estado = EstadoSolicitud.APROBADA
+        solicitud.objetoId = objeto.key
+        solicitud.codigoObjetoAsignado = objeto.id
+
+        objeto.estado = EstadoObjeto.ASIGNADO
+        objeto.solicitudAsignadaId = solicitud.key
+        objeto.codigoSolicitudAsignada = solicitud.id
+
+        solicitudRef.set(solicitud)
+            .addOnSuccessListener {
+                Log.d("SolicitudViewModel", "Solicitud aprobada correctamente")
+
+                objetoRef.set(objeto)
+                    .addOnSuccessListener {
+                        Log.d("SolicitudViewModel", "Objeto vinculado correctamente")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("SolicitudViewModel", "Error al actualizar objeto", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.w("SolicitudViewModel", "Error al actualizar solicitud", e)
+            }
+    }
+
+    fun rechazarSolicitud(solicitud: Solicitud) {
+        val solicitudRef = db.collection("solicitudes").document(solicitud.key)
+        solicitud.estado = EstadoSolicitud.RECHAZADA
+
+        solicitudRef.set(solicitud)
+            .addOnSuccessListener {
+                Log.d("SolicitudViewModel", "Solicitud rechazada correctamente")
+
+                // Si hay un objeto vinculado, se desasocia
+                val objetoKey = solicitud.objetoId
+                if (!objetoKey.isNullOrBlank()) {
+                    val objetoRef = db.collection("objetos").document(objetoKey)
+
+                    objetoRef.get().addOnSuccessListener { doc ->
+                        if (doc.exists()) {
+                            val objeto = doc.toObject(ObjetoEncontrado::class.java)
+                            if (objeto != null) {
+                                objeto.estado = EstadoObjeto.DISPONIBLE
+                                objeto.solicitudAsignadaId = null
+                                objeto.codigoSolicitudAsignada = null
+
+                                objetoRef.set(objeto)
+                                    .addOnSuccessListener {
+                                        Log.d("SolicitudViewModel", "Objeto liberado correctamente")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w("SolicitudViewModel", "Error al liberar objeto", e)
+                                    }
+                            }
+                        }
+                    }.addOnFailureListener { e ->
+                        Log.w("SolicitudViewModel", "Error al consultar objeto vinculado", e)
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("SolicitudViewModel", "Error al rechazar solicitud", e)
+            }
+    }
+
+    fun entregarSolicitud(solicitud: Solicitud) {
+        val solicitudRef = db.collection("solicitudes").document(solicitud.key)
+        solicitud.estado = EstadoSolicitud.ENTREGADA
+
+        solicitudRef.set(solicitud)
+            .addOnSuccessListener {
+                Log.d("SolicitudViewModel", "Solicitud marcada como ENTREGADA")
+
+                val objetoKey = solicitud.objetoId
+                if (!objetoKey.isNullOrBlank()) {
+                    val objetoRef = db.collection("objetos").document(objetoKey)
+
+                    objetoRef.get().addOnSuccessListener { doc ->
+                        if (doc.exists()) {
+                            val objeto = doc.toObject(ObjetoEncontrado::class.java)
+                            if (objeto != null) {
+                                objeto.estado = EstadoObjeto.ENTREGADO
+                                // No se eliminan los IDs asignados por trazabilidad
+
+                                objetoRef.set(objeto)
+                                    .addOnSuccessListener {
+                                        Log.d("SolicitudViewModel", "Objeto marcado como ENTREGADO")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w("SolicitudViewModel", "Error al actualizar objeto", e)
+                                    }
+                            }
+                        }
+                    }.addOnFailureListener { e ->
+                        Log.w("SolicitudViewModel", "Error al consultar objeto vinculado", e)
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("SolicitudViewModel", "Error al actualizar solicitud como ENTREGADA", e)
+            }
+    }
+    fun getSolicitudById(id: String): Solicitud? {
+        return solicitudes.value.find { it.id == id || it.key == id }
+    }
+
+    fun getObjetoById(id: String): ObjetoEncontrado? {
+        return objetosEncontrados.value.find { it.id == id || it.key == id }
+    }
+
+
+
 }

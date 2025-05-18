@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
+import com.leydymacareo.encontrandou.components.EstadoBadge
 
 @Composable
 fun SolicitudesEncargadoScreen(
@@ -37,22 +38,6 @@ fun SolicitudesEncargadoScreen(
     LaunchedEffect(Unit) {
         viewModel.cargarSolicitudesDesdeFirestore()
     }
-
-    val estadoColores = mapOf(
-        "En Espera" to Color.Gray,
-        "Aprobada" to Color(0xFF2E7D32),
-        "Con Coincidencia" to Color(0xFFFB8C00),
-        "Entregado" to Color(0xFF6A1B9A),
-        "Rechazada" to Color(0xFFD32F2F)
-    )
-
-    val estadoIconos = mapOf(
-        "En Espera" to R.drawable.accesstime,
-        "Aprobada" to R.drawable.thumbup,
-        "Con Coincidencia" to R.drawable.wbsunny,
-        "Entregado" to R.drawable.done,
-        "Rechazada" to R.drawable.close
-    )
 
     Scaffold(
         topBar = {
@@ -125,10 +110,6 @@ fun SolicitudesEncargadoScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             solicitudes.forEach { solicitud ->
-                val estado = solicitud.estado
-                val color = estadoColores[estado] ?: Color.Gray
-                val icono = estadoIconos[estado] ?: R.drawable.help
-
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -143,22 +124,10 @@ fun SolicitudesEncargadoScreen(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            painter = painterResource(id = icono),
-                            contentDescription = estado,
-                            tint = color,
-                            modifier = Modifier.size(32.dp)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(solicitud.nombreObjeto, fontWeight = FontWeight.Bold, color = Color.Black)
                             Text(solicitud.fecha, color = Color.Black, fontSize = 13.sp)
-                            Text(
-                                estado.replaceFirstChar { it.uppercase() },
-                                color = color,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            EstadoBadge(estado = solicitud.estado.name)
                         }
                     }
                 }

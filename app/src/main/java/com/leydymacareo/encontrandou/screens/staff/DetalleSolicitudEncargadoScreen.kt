@@ -1,6 +1,7 @@
 package com.leydymacareo.encontrandou.screens.staff
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.leydymacareo.encontrandou.NavRoutes
+import com.leydymacareo.encontrandou.components.EstadoBadge
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 
 @Composable
@@ -29,11 +32,15 @@ fun DetalleSolicitudEncargadoScreen(
     navController: NavController
 ) {
     val solicitudes by viewModel.solicitudes.collectAsState()
+    val objetos by viewModel.objetosEncontrados.collectAsState()
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
-    // Si aún no se han cargado solicitudes, las cargamos
     LaunchedEffect(Unit) {
         if (solicitudes.isEmpty()) {
             viewModel.cargarSolicitudesDesdeFirestore()
+        }
+        if (objetos.isEmpty()) {
+            viewModel.cargarObjetosDesdeFirestore()
         }
     }
 
@@ -73,13 +80,15 @@ fun DetalleSolicitudEncargadoScreen(
                         textAlign = TextAlign.Left
                     )
 
-                    Spacer(modifier = Modifier.width(48.dp)) // para balancear el ícono
+                    Spacer(modifier = Modifier.width(48.dp))
                 }
             }
         },
         content = { innerPadding ->
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFF5F5F5))
                     .padding(innerPadding)
                     .padding(20.dp)
                     .verticalScroll(rememberScrollState()),
@@ -91,20 +100,7 @@ fun DetalleSolicitudEncargadoScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Row(
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(Color(0xFFFCE7B2))
-                                .padding(horizontal = 16.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "🕒 ${solicitud.estado}",
-                                color = Color.Black,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                        EstadoBadge(estado = solicitud.estado.name)
 
                         Spacer(modifier = Modifier.height(20.dp))
 
@@ -134,19 +130,91 @@ fun DetalleSolicitudEncargadoScreen(
                         InfoRow("Fecha Aproximada", solicitud.fecha)
                         InfoRow("Hora Aproximada", solicitud.hora)
                         InfoRow("Categoría", solicitud.categoria)
-                        InfoRow(
-                            "Marca o Modelo",
-                            if (solicitud.descripcion.isBlank()) "No especificado" else solicitud.descripcion
-                        )
+                        InfoRow("Marca o Modelo", if (solicitud.descripcion.isBlank()) "No especificado" else solicitud.descripcion)
                         InfoRow("Color Principal", solicitud.color)
                         InfoRow("Descripción Adicional", solicitud.descripcion)
-
-                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (solicitud.estado.name == "APROBADA") {
+                    Button(
+                        onClick = { showConfirmDialog = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text("Marcar como Entregada", color = Color.White)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                val disponibles = objetos.filter { it.estado.name == "DISPONIBLE" }
+
+                if (disponibles.isNotEmpty()) {
+                    Text(
+                        text = "Objetos disponibles para asignar:",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+
+                    disponibles.forEach { objeto ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp)
+                                .clickable {
+                                    navController.navigate(
+                                        NavRoutes.detalleObjetoParaAsignarRoute(
+                                            solicitudId = solicitud.key,
+                                            objetoId = objeto.key
+                                        )
+                                    )
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(text = objeto.nombre, fontWeight = FontWeight.Bold)
+                                Text(text = "Categoría: ${objeto.categoria}")
+                                Text(text = "Color: ${objeto.color}")
+                                Text(text = "Lugar: ${objeto.lugar}")
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(90.dp))
             }
         }
     )
+
+    // Diálogo de confirmación
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("¿Confirmar entrega?") },
+            text = { Text("¿Estás seguro de que quieres marcar esta solicitud como entregada?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.entregarSolicitud(solicitud)
+                        showConfirmDialog = false
+                        navController.popBackStack()
+                    }
+                ) {
+                    Text("Sí")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
-
-
