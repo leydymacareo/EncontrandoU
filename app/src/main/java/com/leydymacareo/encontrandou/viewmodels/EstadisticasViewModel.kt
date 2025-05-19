@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,6 +16,9 @@ class EstadisticasViewModel : ViewModel() {
     private val _selectedMonth = MutableStateFlow("Abril")
     val selectedMonth: StateFlow<String> = _selectedMonth
 
+    private val _selectedYear = MutableStateFlow("2025")
+    val selectedYear: StateFlow<String> = _selectedYear
+
     private val _selectedTipoRegistro = MutableStateFlow("solicitudes")
     val selectedTipoRegistro: StateFlow<String> = _selectedTipoRegistro
 
@@ -28,6 +32,10 @@ class EstadisticasViewModel : ViewModel() {
         _selectedMonth.value = value
     }
 
+    fun setAnio(value: String) {
+        _selectedYear.value = value
+    }
+
     fun setTipoRegistro(value: String) {
         _selectedTipoRegistro.value = value
     }
@@ -39,22 +47,30 @@ class EstadisticasViewModel : ViewModel() {
     fun cargarDatosFiltrados() {
         viewModelScope.launch {
             val coleccion = if (_selectedTipoRegistro.value == "solicitudes") "solicitudes" else "objetos"
-            val ref = db.collection(coleccion)
-                .whereEqualTo("mes", _selectedMonth.value)
 
-            val consulta = if (!selectedEstado.value.isNullOrBlank() && coleccion == "solicitudes") {
-                ref.whereEqualTo("estado", selectedEstado.value)
-            } else {
-                ref
+            var ref = db.collection(coleccion)
+                .whereEqualTo("mes", _selectedMonth.value)
+                .whereEqualTo("año", _selectedYear.value)
+
+            Log.d("Estadisticas", "Filtrando: tipo=$coleccion, mes=${_selectedMonth.value}, año=${_selectedYear.value}, estado=${_selectedEstado.value}")
+
+            if (!selectedEstado.value.isNullOrBlank() && coleccion == "solicitudes") {
+                ref = ref.whereEqualTo("estado", selectedEstado.value)
             }
 
-            consulta.get()
+            ref.get()
                 .addOnSuccessListener { result ->
+                    Log.d("Estadisticas", "Resultados obtenidos: ${result.size()}")
+                    result.documents.forEach {
+                        Log.d("Estadisticas", "Doc ID=${it.id} - estado=${it.getString("estado")}")
+                    }
                     _documentosFiltrados.value = result
                 }
                 .addOnFailureListener {
+                    Log.e("Estadisticas", "Error al consultar Firestore", it)
                     _documentosFiltrados.value = null
                 }
         }
     }
+
 }

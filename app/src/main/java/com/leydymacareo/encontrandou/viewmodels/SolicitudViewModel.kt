@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.leydymacareo.encontrandou.models.ObjetoEncontrado
 import com.leydymacareo.encontrandou.models.Solicitud
+import com.leydymacareo.encontrandou.utils.obtenerAnioDesdeFecha
+import com.leydymacareo.encontrandou.utils.obtenerMesDesdeFecha
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
@@ -31,15 +33,40 @@ class SolicitudViewModel : ViewModel() {
 
     fun agregarSolicitud(solicitud: Solicitud) {
         _solicitudes.value = _solicitudes.value + solicitud
+
+        // Obtener mes y año desde la fecha de registro
+        val mes = obtenerMesDesdeFecha(solicitud.fecha)
+        val año = obtenerAnioDesdeFecha(solicitud.fecha)
+
+        val solicitudMap = hashMapOf(
+            "nombreObjeto" to solicitud.nombreObjeto,
+            "propietario" to solicitud.propietario,
+            "fechaAproximada" to solicitud.fechaAproximada,
+            "fecha" to solicitud.fecha,
+            "horaAproximada" to solicitud.horaAproximada,
+            "categoria" to solicitud.categoria,
+            "color" to solicitud.color,
+            "lugar" to solicitud.lugar,
+            "descripcion" to solicitud.descripcion,
+            "estado" to solicitud.estado.name,
+            "imagenUri" to solicitud.imagenUri,
+            "id" to solicitud.id,
+            "sessionId" to solicitud.sessionId,
+            "codigoObjetoAsignado" to solicitud.codigoObjetoAsignado,
+            "mes" to mes,   // ✅ nuevo campo
+            "año" to año    // ✅ nuevo campo
+        )
+
         db.collection("solicitudes")
-            .add(solicitud)
+            .add(solicitudMap)
             .addOnSuccessListener { docRef ->
-                Log.d("SolicitudViewModel", "Solicitud guardada: ${docRef.id}")
+                Log.d("SolicitudViewModel", "Solicitud guardada con mes/año: ${docRef.id}")
             }
             .addOnFailureListener { e ->
                 Log.w("SolicitudViewModel", "Error al guardar solicitud", e)
             }
     }
+
 
     fun agregarObjeto(objeto: ObjetoEncontrado) {
         _objetosEncontrados.value = _objetosEncontrados.value + objeto
@@ -249,7 +276,13 @@ class SolicitudViewModel : ViewModel() {
         objeto.solicitudAsignadaId = solicitud.key
         objeto.codigoSolicitudAsignada = solicitud.id
 
-        solicitudRef.set(solicitud)
+        solicitudRef.update(
+            mutableMapOf(
+                "estado" to EstadoSolicitud.APROBADA,
+                "objetoId" to objeto.key,
+                "codigoObjetoAsignado" to objeto.id
+            ) as Map<String, Any>
+        )
             .addOnSuccessListener {
                 Log.d("SolicitudViewModel", "Solicitud aprobada correctamente")
 
@@ -270,7 +303,9 @@ class SolicitudViewModel : ViewModel() {
         val solicitudRef = db.collection("solicitudes").document(solicitud.key)
         solicitud.estado = EstadoSolicitud.RECHAZADA
 
-        solicitudRef.set(solicitud)
+        solicitudRef.update( hashMapOf<String, Any>(
+            "estado" to EstadoSolicitud.RECHAZADA
+        ))
             .addOnSuccessListener {
                 Log.d("SolicitudViewModel", "Solicitud rechazada correctamente")
 
@@ -310,7 +345,9 @@ class SolicitudViewModel : ViewModel() {
         val solicitudRef = db.collection("solicitudes").document(solicitud.key)
         solicitud.estado = EstadoSolicitud.ENTREGADA
 
-        solicitudRef.set(solicitud)
+        solicitudRef.update( hashMapOf<String, Any>(
+            "estado" to EstadoSolicitud.ENTREGADA
+        ))
             .addOnSuccessListener {
                 Log.d("SolicitudViewModel", "Solicitud marcada como ENTREGADA")
 
@@ -355,7 +392,9 @@ class SolicitudViewModel : ViewModel() {
         val solicitudRef = db.collection("solicitudes").document(solicitud.key)
         solicitud.estado = EstadoSolicitud.CANCELADA
 
-        solicitudRef.set(solicitud)
+        solicitudRef.update( hashMapOf<String, Any>(
+            "estado" to EstadoSolicitud.CANCELADA
+        ))
             .addOnSuccessListener {
                 Log.d("SolicitudViewModel", "Solicitud cancelada correctamente")
                 // Actualiza la lista en memoria
@@ -387,8 +426,8 @@ class SolicitudViewModel : ViewModel() {
         var puntaje = 0
         val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         try {
-            val fechaSolicitud = formato.parse(solicitud.fecha)
-            val fechaObjeto = formato.parse(objeto.fecha)
+            val fechaSolicitud = formato.parse(solicitud.fechaAproximada)
+            val fechaObjeto = formato.parse(objeto.fechaAproximada)
 
             if (fechaSolicitud != null && fechaObjeto != null) {
                 val diffMs = kotlin.math.abs(fechaSolicitud.time - fechaObjeto.time)

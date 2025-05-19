@@ -11,3 +11,9 @@ fun obtenerMesDesdeFecha(fecha: String): String {
     return date.month.getDisplayName(TextStyle.FULL, Locale("es"))
         .replaceFirstChar { it.uppercase() }
 }
+
+fun obtenerAnioDesdeFecha(fecha: String): String {
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val date = LocalDate.parse(fecha, formatter)
+    return date.year.toString()
+}

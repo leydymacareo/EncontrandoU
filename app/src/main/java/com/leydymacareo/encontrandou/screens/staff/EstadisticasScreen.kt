@@ -4,7 +4,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -53,6 +55,7 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             // Aquí agregaremos los filtros, botón, gráficos y KPIs
             // Listas de opciones
@@ -63,6 +66,15 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
             val selectedMes by viewModel.selectedMonth.collectAsState()
             val selectedTipo by viewModel.selectedTipoRegistro.collectAsState()
             val selectedEstado by viewModel.selectedEstado.collectAsState()
+            val anios = listOf("2023", "2024", "2025")
+            val selectedAnio by viewModel.selectedYear.collectAsState()
+
+            DropdownFiltro(
+                label = "Año",
+                opciones = anios,
+                seleccionado = selectedAnio,
+                onSeleccionado = { viewModel.setAnio(it) }
+            )
 
 // Mes
             DropdownFiltro(
@@ -94,7 +106,7 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
                     label = "Estado (opcional)",
                     opciones = listOf("") + estadosSegunTipo, // permite limpiar
                     seleccionado = selectedEstado ?: "",
-                    onSeleccionado = { viewModel.setEstado(if (it.isBlank()) null else it) }
+                    onSeleccionado = { viewModel.setEstado(if (it.isBlank()) null else it.uppercase()) }
                 )
             }
 
