@@ -57,6 +57,14 @@ fun DetalleSolicitudEncargadoScreen(
     val puedeEntregar = solicitud.estado.name == "APROBADA"
     val disponibles = objetos.filter { it.estado.name == "DISPONIBLE" }
 
+    val coincidencias = if (puedeAsignar) {
+        viewModel.obtenerCoincidencias(solicitud, disponibles)
+    } else emptyList()
+
+    val disponiblesFiltrados = disponibles.filterNot { coincidencias.contains(it) }
+
+
+
     Scaffold(
         topBar = {
             Surface {
@@ -220,15 +228,14 @@ fun DetalleSolicitudEncargadoScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
-                // ✅ Lista de objetos solo si aún es asignable
-                if (puedeAsignar && disponibles.isNotEmpty()) {
+                if (puedeAsignar && coincidencias.isNotEmpty()) {
                     Text(
-                        text = "Objetos disponibles para asignar:",
+                        text = "Objetos sugeridos para asignar:",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
 
-                    disponibles.forEach { objeto ->
+                    coincidencias.forEach { objeto ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -249,12 +256,50 @@ fun DetalleSolicitudEncargadoScreen(
                                 Text("Categoría: ${objeto.categoria}")
                                 Text("Color: ${objeto.color}")
                                 Text("Lugar: ${objeto.lugar}")
+                                Text("Fecha aproximada: ${objeto.fecha}")
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Otros objetos disponibles:",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                    disponiblesFiltrados.forEach { objeto ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp)
+                                .clickable {
+                                    navController.navigate(
+                                        NavRoutes.detalleObjetoParaAsignarRoute(
+                                            solicitudId = solicitud.key,
+                                            objetoId = objeto.key
+                                        )
+                                    )
+                                },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(text = objeto.nombre, fontWeight = FontWeight.Bold)
+                                Text("Categoría: ${objeto.categoria}")
+                                Text("Color: ${objeto.color}")
+                                Text("Lugar: ${objeto.lugar}")
+                                Text("Fecha aproximada: ${objeto.fecha}")
+
                             }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(90.dp))
                 }
+
+
             }
         }
     )

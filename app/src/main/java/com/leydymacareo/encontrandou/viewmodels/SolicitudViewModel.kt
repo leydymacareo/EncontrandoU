@@ -366,6 +366,46 @@ class SolicitudViewModel : ViewModel() {
             }
     }
 
+    fun obtenerCoincidencias(
+        solicitud: Solicitud,
+        objetos: List<ObjetoEncontrado>
+    ): List<ObjetoEncontrado> {
+        return objetos
+            .filter { it.estado.name == "DISPONIBLE" && it.categoria == solicitud.categoria }
+            .map { it to calcularPuntajeCoincidencia(solicitud, it) }
+            .onEach { (objeto, puntaje) ->
+                Log.d("CoincidenciaDebug", "Objeto ${objeto.nombre} → Puntaje: $puntaje")
+            }
+            .sortedByDescending { it.second }
+            .map { it.first }
+    }
+
+
+    private fun calcularPuntajeCoincidencia(solicitud: Solicitud, objeto: ObjetoEncontrado): Int {
+        var puntaje = 0
+        val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        try {
+            val fechaSolicitud = formato.parse(solicitud.fecha)
+            val fechaObjeto = formato.parse(objeto.fecha)
+
+            if (fechaSolicitud != null && fechaObjeto != null) {
+                val diffMs = kotlin.math.abs(fechaSolicitud.time - fechaObjeto.time)
+                val diffDias = (diffMs / (1000 * 60 * 60 * 24)).toInt()
+
+                puntaje += when {
+                    diffDias == 0 -> 30
+                    diffDias == 1 -> 20
+                    diffDias <= 2 -> 10
+                    else -> 0
+                }
+            }
+        } catch (e: Exception) {
+        }
+        if (solicitud.lugar.equals(objeto.lugar, ignoreCase = true)) puntaje += 30
+        if (solicitud.color.equals(objeto.color, ignoreCase = true)) puntaje += 20
+        // Categoría ya fue filtrada antes
+        return puntaje
+    }
 
 
 
