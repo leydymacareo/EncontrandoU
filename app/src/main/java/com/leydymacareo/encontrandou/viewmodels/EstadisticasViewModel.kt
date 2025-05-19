@@ -13,13 +13,13 @@ class EstadisticasViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
 
-    private val _selectedMonth = MutableStateFlow("Abril")
+    private val _selectedMonth = MutableStateFlow("Mayo")
     val selectedMonth: StateFlow<String> = _selectedMonth
 
     private val _selectedYear = MutableStateFlow("2025")
     val selectedYear: StateFlow<String> = _selectedYear
 
-    private val _selectedTipoRegistro = MutableStateFlow("solicitudes")
+    private val _selectedTipoRegistro = MutableStateFlow("Solicitudes")
     val selectedTipoRegistro: StateFlow<String> = _selectedTipoRegistro
 
     private val _selectedEstado = MutableStateFlow<String?>(null)
@@ -46,7 +46,9 @@ class EstadisticasViewModel : ViewModel() {
 
     fun cargarDatosFiltrados() {
         viewModelScope.launch {
-            val coleccion = if (_selectedTipoRegistro.value == "solicitudes") "solicitudes" else "objetos"
+            val tipo = _selectedTipoRegistro.value.lowercase()
+            val coleccion = if (tipo == "solicitudes") "solicitudes" else "objetos"
+
 
             var ref = db.collection(coleccion)
                 .whereEqualTo("mes", _selectedMonth.value)
@@ -54,7 +56,7 @@ class EstadisticasViewModel : ViewModel() {
 
             Log.d("Estadisticas", "Filtrando: tipo=$coleccion, mes=${_selectedMonth.value}, año=${_selectedYear.value}, estado=${_selectedEstado.value}")
 
-            if (!selectedEstado.value.isNullOrBlank() && coleccion == "solicitudes") {
+            if (!selectedEstado.value.isNullOrBlank()) {
                 ref = ref.whereEqualTo("estado", selectedEstado.value)
             }
 

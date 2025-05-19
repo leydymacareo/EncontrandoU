@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.leydymacareo.encontrandou.viewmodels.EstadisticasViewModel
 
@@ -52,6 +53,7 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
     ) { paddingValues ->
         Column(
             modifier = Modifier
+                .background(Color(0xFFF5F5F5))
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
                 .fillMaxSize()
@@ -60,7 +62,7 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
             // Aquí agregaremos los filtros, botón, gráficos y KPIs
             // Listas de opciones
             val meses = listOf("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
-            val tipos = listOf("objetos", "solicitudes")
+            val tipos = listOf("Objetos", "Solicitudes")
             val estados = listOf("pendiente", "aprobada", "rechazada", "entregada")
 
             val selectedMes by viewModel.selectedMonth.collectAsState()
@@ -68,91 +70,130 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
             val selectedEstado by viewModel.selectedEstado.collectAsState()
             val anios = listOf("2023", "2024", "2025")
             val selectedAnio by viewModel.selectedYear.collectAsState()
-
-            DropdownFiltro(
-                label = "Año",
-                opciones = anios,
-                seleccionado = selectedAnio,
-                onSeleccionado = { viewModel.setAnio(it) }
-            )
-
-// Mes
-            DropdownFiltro(
-                label = "Mes",
-                opciones = meses,
-                seleccionado = selectedMes,
-                onSeleccionado = { viewModel.setMes(it) }
-            )
-
-// Tipo
-            DropdownFiltro(
-                label = "Tipo de registro",
-                opciones = tipos,
-                seleccionado = selectedTipo,
-                onSeleccionado = { viewModel.setTipoRegistro(it) }
-            )
-
             val estadosSolicitud = listOf("PENDIENTE", "APROBADA", "RECHAZADA", "ENTREGADA", "CANCELADA")
             val estadosObjeto = listOf("DISPONIBLE", "ASIGNADO", "ENTREGADO")
 
-            val estadosSegunTipo = when (selectedTipo) {
-                "solicitudes" -> estadosSolicitud
-                "objetos" -> estadosObjeto
-                else -> emptyList()
-            }
-
-            if (estadosSegunTipo.isNotEmpty()) {
-                DropdownFiltro(
-                    label = "Estado (opcional)",
-                    opciones = listOf("") + estadosSegunTipo, // permite limpiar
-                    seleccionado = selectedEstado ?: "",
-                    onSeleccionado = { viewModel.setEstado(if (it.isBlank()) null else it.uppercase()) }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                DropdownFiltroModern(
+                    label = "Año",
+                    opciones = anios,
+                    seleccionado = selectedAnio,
+                    onSeleccionado = { viewModel.setAnio(it) },
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                )
+                DropdownFiltroModern(
+                    label = "Mes",
+                    opciones = meses,
+                    seleccionado = selectedMes,
+                    onSeleccionado = { viewModel.setMes(it) },
+                    modifier = Modifier.weight(1f)
                 )
             }
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                DropdownFiltroModern(
+                    label = "Tipo de registro",
+                    opciones = tipos,
+                    seleccionado = selectedTipo,
+                    onSeleccionado = { viewModel.setTipoRegistro(it) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                )
+
+                val estadosSegunTipo = when (selectedTipo) {
+                    "Solicitudes" -> estadosSolicitud
+                    "Objetos" -> estadosObjeto
+                    else -> emptyList()
+                }
+
+                DropdownFiltroModern(
+                    label = "Estado (opcional)",
+                    opciones = listOf("") + estadosSegunTipo,
+                    seleccionado = selectedEstado ?: "",
+                    onSeleccionado = { viewModel.setEstado(if (it.isBlank()) null else it.uppercase()) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                )
+            }
+
 
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = { viewModel.cargarDatosFiltrados() },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1))
             ) {
-                Text("Consultar")
+                Text("Consultar", fontSize = 18.sp, color = Color.White)
             }
+
+
             val documentos = viewModel.documentosFiltrados.collectAsState().value
 
             documentos?.let { snapshot ->
                 val total = snapshot.size()
                 val estadosCount = snapshot.groupingBy { it.getString("estado") ?: "Sin estado" }.eachCount()
 
+                val hayFiltroEstado = !selectedEstado.isNullOrBlank()
+                if (hayFiltroEstado) {
+                    Text(
+                        text = "Mostrando resultados filtrados por estado: ${selectedEstado}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
-                Text("Generalidades", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("Resumen del mes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Column {
                     EstadisticaKpi("Total registros encontrados", "$total")
 
                     if (estadosCount.isNotEmpty()) {
-                        if (selectedTipo == "solicitudes") {
-                            val pendientes = estadosCount["PENDIENTE"] ?: 0
-                            val aprobadas = estadosCount["APROBADA"] ?: 0
-                            val rechazadas = estadosCount["RECHAZADA"] ?: 0
-                            val entregadas = estadosCount["ENTREGADA"] ?: 0
-                            val canceladas = estadosCount["CANCELADA"] ?: 0
+                        val hayFiltroEstado = !selectedEstado.isNullOrBlank()
+                        if (selectedTipo == "Solicitudes") {
+                            if (!hayFiltroEstado) {
+                                val pendientes = estadosCount["PENDIENTE"] ?: 0
+                                val aprobadas = estadosCount["APROBADA"] ?: 0
+                                val rechazadas = estadosCount["RECHAZADA"] ?: 0
+                                val entregadas = estadosCount["ENTREGADA"] ?: 0
+                                val canceladas = estadosCount["CANCELADA"] ?: 0
 
-                            EstadisticaKpi("Pendientes / Aprobadas / Rechazadas", "$pendientes / $aprobadas / $rechazadas")
-                            EstadisticaKpi("Entregadas", "$entregadas")
-                            EstadisticaKpi("Canceladas", "$canceladas")
+                                EstadisticaKpi("Pendientes / Aprobadas / Rechazadas", "$pendientes / $aprobadas / $rechazadas")
+                                EstadisticaKpi("Entregadas", "$entregadas")
+                                EstadisticaKpi("Canceladas", "$canceladas")
 
-                            val porcentajeExito = if (total > 0) (aprobadas.toFloat() / total * 100).toInt() else 0
-                            EstadisticaKpi("Porcentaje de éxito", "$porcentajeExito%")
-                        } else if (selectedTipo == "objetos") {
-                            val disponibles = estadosCount["DISPONIBLE"] ?: 0
-                            val asignados = estadosCount["ASIGNADO"] ?: 0
-                            val entregados = estadosCount["ENTREGADO"] ?: 0
+                                val porcentajeExito = if (total > 0) (aprobadas.toFloat() / total * 100).toInt() else 0
+                                EstadisticaKpi("Porcentaje de éxito", "$porcentajeExito%")
+                            } else {
+                                EstadisticaKpi("Total solicitudes ${selectedEstado?.lowercase()?.replaceFirstChar { it.uppercase() }}", "$total")
+                            }
+                        } else if (selectedTipo == "Objetos") {
+                            if (!hayFiltroEstado) {
+                                val disponibles = estadosCount["DISPONIBLE"] ?: 0
+                                val asignados = estadosCount["ASIGNADO"] ?: 0
+                                val entregados = estadosCount["ENTREGADO"] ?: 0
 
-                            EstadisticaKpi("Disponibles / Asignados / Entregados", "$disponibles / $asignados / $entregados")
+                                EstadisticaKpi("Disponibles / Asignados / Entregados", "$disponibles / $asignados / $entregados")
+
+                                val porcentajeAsignados = if (total > 0) (asignados.toFloat() / total * 100).toInt() else 0
+                                val porcentajeEntregados = if (total > 0) (entregados.toFloat() / total * 100).toInt() else 0
+
+                                EstadisticaKpi("Porcentaje asignados", "$porcentajeAsignados%")
+                                EstadisticaKpi("Porcentaje entregados", "$porcentajeEntregados%")
+                            } else {
+                                EstadisticaKpi("Total objetos ${selectedEstado?.lowercase()?.replaceFirstChar { it.uppercase() }}", "$total")
+                            }
                         }
+
 
                         val categoriasCount = snapshot.groupingBy { it.getString("categoria") ?: "Sin categoría" }
                             .eachCount()
@@ -160,16 +201,21 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
                             .sortedByDescending { it.second }
 
                         Spacer(modifier = Modifier.height(24.dp))
-                        Text("Registros por Categoría", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text("Distribución por categoría", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        BarChart(data = categoriasCount)
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                PieChart(data = categoriasCount)
+                                Spacer(modifier = Modifier.height(12.dp))
+                                LeyendaPie(data = categoriasCount)
+                            }
+                        }
 
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text("Categorías más comunes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(12.dp))
 
-                        PieChart(data = categoriasCount)
                     }
 
                 }
@@ -180,46 +226,52 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownFiltro(
+fun DropdownFiltroModern(
     label: String,
     opciones: List<String>,
     seleccionado: String,
-    onSeleccionado: (String) -> Unit
+    onSeleccionado: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(text = label, style = MaterialTheme.typography.bodyMedium)
-        Box {
-            OutlinedTextField(
-                value = seleccionado,
-                onValueChange = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = true },
-                enabled = false,
-                readOnly = true
-            )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                opciones.forEach { opcion ->
-                    DropdownMenuItem(
-                        text = { Text(opcion) },
-                        onClick = {
-                            onSeleccionado(opcion)
-                            expanded = false
-                        }
-                    )
-                }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier.padding(vertical = 6.dp)
+    ) {
+        OutlinedTextField(
+            readOnly = true,
+            value = seleccionado,
+            onValueChange = {},
+            label = { Text(label, fontSize = 14.sp) },
+            textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            opciones.forEach { opcion ->
+                DropdownMenuItem(
+                    text = { Text(opcion) },
+                    onClick = {
+                        onSeleccionado(opcion)
+                        expanded = false
+                    }
+                )
             }
         }
     }
-
 }
+
 @Composable
 fun EstadisticaKpi(titulo: String, valor: String) {
     Card(
@@ -234,35 +286,7 @@ fun EstadisticaKpi(titulo: String, valor: String) {
         }
     }
 }
-@Composable
-fun BarChart(data: List<Pair<String, Int>>, maxBarHeight: Dp = 120.dp) {
-    val maxCount = data.maxOfOrNull { it.second } ?: 1
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(maxBarHeight + 32.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        data.forEach { (label, value) ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(
-                    modifier = Modifier
-                        .width(24.dp)
-                        .height((value / maxCount.toFloat() * maxBarHeight.value).dp)
-                        .background(Color(0xFF42A5F5), shape = RoundedCornerShape(4.dp))
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = label.take(5), // por si son nombres largos
-                    style = MaterialTheme.typography.labelSmall,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun PieChart(
@@ -281,31 +305,58 @@ fun PieChart(
 
     Canvas(
         modifier = modifier
-            .size(radius * 2)
+            .fillMaxWidth()
+            .height(radius * 2)
             .padding(8.dp)
     ) {
+        val canvasWidth = size.width
+        val canvasHeight = size.height
+        val centerX = canvasWidth / 2
+        val centerY = canvasHeight / 2
+
         var startAngle = -90f
         angles.forEachIndexed { index, sweepAngle ->
             drawArc(
                 color = colors[index % colors.size],
                 startAngle = startAngle,
                 sweepAngle = sweepAngle,
-                useCenter = true
+                useCenter = true,
+                topLeft = androidx.compose.ui.geometry.Offset(
+                    centerX - radius.toPx(),
+                    centerY - radius.toPx()
+                ),
+                size = androidx.compose.ui.geometry.Size(
+                    width = radius.toPx() * 2,
+                    height = radius.toPx() * 2
+                )
             )
             startAngle += sweepAngle
         }
     }
 
+
     Spacer(modifier = Modifier.height(8.dp))
 
-    // Leyenda
-    Column {
+
+
+}
+@Composable
+fun LeyendaPie(data: List<Pair<String, Int>>) {
+    val colors = listOf(
+        Color(0xFFEF5350), Color(0xFFAB47BC), Color(0xFF42A5F5),
+        Color(0xFF66BB6A), Color(0xFFFFA726), Color(0xFF26C6DA)
+    )
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         data.forEachIndexed { index, (label, count) ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 2.dp)
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(12.dp)
-                        .background(colors[index % colors.size])
+                        .size(14.dp)
+                        .background(colors[index % colors.size], shape = RoundedCornerShape(3.dp))
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("$label: $count", style = MaterialTheme.typography.bodySmall)

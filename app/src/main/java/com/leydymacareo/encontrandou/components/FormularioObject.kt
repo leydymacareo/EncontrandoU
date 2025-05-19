@@ -289,7 +289,14 @@ fun DatePickerModal(
     onDateSelected: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                return utcTimeMillis <= calendar.timeInMillis
+            }
+        }
+    )
 
     AlertDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
