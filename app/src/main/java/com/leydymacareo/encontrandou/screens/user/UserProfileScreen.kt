@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.user
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -29,8 +30,25 @@ fun UserProfileScreen(navController: NavController, sessionViewModel: SessionVie
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Perfil") })
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFF5F5F5))
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Perfil",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp, bottom = 20.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
         },
+
         bottomBar = {
             Surface(
                 color = Color.White,

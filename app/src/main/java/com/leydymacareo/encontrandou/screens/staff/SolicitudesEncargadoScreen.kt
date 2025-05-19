@@ -126,6 +126,7 @@ fun SolicitudesEncargadoScreen(
                     ) {
                         Column {
                             Text(solicitud.nombreObjeto, fontWeight = FontWeight.Bold, color = Color.Black)
+                            Text(text = solicitud.id, fontSize = 13.sp, color = Color.Black)
                             Text(solicitud.fecha, color = Color.Black, fontSize = 13.sp)
                             EstadoBadge(estado = solicitud.estado.name)
                         }

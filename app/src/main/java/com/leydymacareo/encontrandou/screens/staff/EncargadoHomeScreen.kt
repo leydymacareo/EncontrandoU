@@ -202,6 +202,7 @@ fun EncargadoHomeScreen(
 
                             Column {
                                 Text(text = objeto.nombre, fontWeight = FontWeight.Bold, color = Color.Black)
+                                Text(text = objeto.id, fontSize = 13.sp, color = Color.Black)
                                 Text(text = objeto.fecha, fontSize = 13.sp, color = Color.Black)
                                 EstadoBadge(estado = objeto.estado.name)
                             }

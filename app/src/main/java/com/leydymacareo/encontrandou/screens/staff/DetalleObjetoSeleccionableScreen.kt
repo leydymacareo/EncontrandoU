@@ -1,5 +1,6 @@
 package com.leydymacareo.encontrandou.screens.staff
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -53,14 +56,30 @@ fun DetalleObjetoSeleccionableScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Asignar Objeto") },
-                navigationIcon = {
+            Surface {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(top = 40.dp, bottom = 20.dp, start = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
                     }
+
+                    Text(
+                        text = "Asignar Objeto",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Left
+                    )
+
+                    Spacer(modifier = Modifier.width(48.dp))
                 }
-            )
+            }
+
         }
     ) { innerPadding ->
         Column(

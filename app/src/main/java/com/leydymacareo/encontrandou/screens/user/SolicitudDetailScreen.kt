@@ -49,7 +49,7 @@ fun SolicitudDetailScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFF5F5F5))
+                        .background(Color.White)
                         .padding(top = 40.dp, bottom = 20.dp, start = 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
