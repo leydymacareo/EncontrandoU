@@ -1,6 +1,4 @@
 package com.leydymacareo.encontrandou.navigation
-
-
 import HelpScreen
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -10,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.leydymacareo.encontrandou.NavRoutes
+import com.leydymacareo.encontrandou.screens.EstadisticasScreen
 import com.leydymacareo.encontrandou.screens.staff.EncargadoHomeScreen
 import com.leydymacareo.encontrandou.screens.user.HomeScreenUsuario
 import com.leydymacareo.encontrandou.screens.login.*
@@ -26,6 +25,7 @@ import com.leydymacareo.encontrandou.screens.staff.EncargadoProfileScreen
 import com.leydymacareo.encontrandou.screens.staff.SolicitudesEncargadoScreen
 import com.leydymacareo.encontrandou.screens.user.SolicitudDetailScreen
 import com.leydymacareo.encontrandou.screens.user.UserProfileScreen
+import com.leydymacareo.encontrandou.viewmodels.EstadisticasViewModel
 
 @Composable
 fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
@@ -139,6 +139,11 @@ fun AppNavHost(sessionViewModel: SessionViewModel = viewModel()) {
 
         composable(NavRoutes.EncargadoAjustes) {
             ConfiguracionEncargadoScreen(navController)
+        }
+
+        composable(NavRoutes.Estadisticas) {
+            val estadisticasViewModel: EstadisticasViewModel = viewModel()
+            EstadisticasScreen(navController = navController, viewModel = estadisticasViewModel)
         }
 
         composable(NavRoutes.NuevoObjeto) {

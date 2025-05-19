@@ -15,8 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +28,6 @@ import coil.compose.AsyncImage
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.components.EstadoBadge
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
-import com.leydymacareo.encontrandou.models.ObjetoEncontrado
 import com.leydymacareo.encontrandou.viewmodel.SessionState
 
 
@@ -93,7 +90,12 @@ fun EncargadoHomeScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Filtros")
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable {
+                            navController.navigate(NavRoutes.Estadisticas)
+                        }
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.barchart),
                             contentDescription = "Estadísticas"
@@ -101,6 +103,7 @@ fun EncargadoHomeScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Estadísticas")
                     }
+
                 }
             }
         },
