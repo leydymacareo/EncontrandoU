@@ -21,6 +21,7 @@ import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.viewmodels.ConfiguracionViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfiguracionEncargadoScreen(navController: NavController) {
     val viewModel: ConfiguracionViewModel = viewModel()
@@ -41,6 +42,12 @@ fun ConfiguracionEncargadoScreen(navController: NavController) {
         "Colores" -> colores
         else -> emptyList()
     }
+
+    val placeholderMap = mapOf(
+        "Categorias" to "Nueva categoría",
+        "Lugares" to "Nuevo lugar",
+        "Colores" to "Nuevo color"
+    )
 
     val onAddItem = {
         if (editText.isNotBlank()) {
@@ -197,9 +204,17 @@ fun ConfiguracionEncargadoScreen(navController: NavController) {
             TextField(
                 value = editText,
                 onValueChange = { editText = it },
-                placeholder = { Text("Nuevo ${selectedTab.lowercase()}") },
-                modifier = Modifier.fillMaxWidth()
+                placeholder = { Text(placeholderMap[selectedTab] ?: "Nuevo elemento") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color(0xFFBFEBFB),
+                    focusedIndicatorColor = Color(0xFF00AFF1),
+                    unfocusedIndicatorColor = Color.Gray,
+                    cursorColor = Color(0xFF00AFF1),
+
+                )
             )
+
 
             Spacer(modifier = Modifier.height(8.dp))
 

@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.components.obtenerFechaActual
 import com.leydymacareo.encontrandou.models.ObjetoEncontrado
 import com.leydymacareo.encontrandou.viewmodel.SessionState
@@ -37,7 +38,7 @@ fun NuevoObjetoScreen(
             CenterAlignedTopAppBar(
                 title = { Text("Nuevo Objeto", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 navigationIcon = {
-                    IconButton(onClick = { /* acción volver */ }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
                 }

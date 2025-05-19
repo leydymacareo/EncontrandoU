@@ -34,7 +34,9 @@ class ConfiguracionViewModel : ViewModel() {
         db.collection(nombre)
             .get()
             .addOnSuccessListener { result ->
-                val lista = result.mapNotNull { it.getString("nombre") }
+                val lista = result
+                    .mapNotNull { it.getString("nombre") }
+                    .sortedBy { it.lowercase() }
                 onResult(lista)
             }
             .addOnFailureListener { e ->
@@ -42,6 +44,7 @@ class ConfiguracionViewModel : ViewModel() {
                 onResult(emptyList())
             }
     }
+
 
     fun agregarElemento(tipo: String, nombre: String) {
         if (nombre.isBlank()) return
