@@ -70,15 +70,40 @@ class SolicitudViewModel : ViewModel() {
 
     fun agregarObjeto(objeto: ObjetoEncontrado) {
         _objetosEncontrados.value = _objetosEncontrados.value + objeto
+
+        // Obtener mes y año desde la fecha de registro (usa la fecha real de creación)
+        val mes = obtenerMesDesdeFecha(objeto.fecha)
+        val año = obtenerAnioDesdeFecha(objeto.fecha)
+
+        val objetoMap = hashMapOf(
+            "nombre" to objeto.nombre,
+            "fecha" to objeto.fecha,
+            "estado" to objeto.estado.name,
+            "imagenUri" to objeto.imagenUri,
+            "descripcion" to objeto.descripcion,
+            "categoria" to objeto.categoria,
+            "color" to objeto.color,
+            "marca" to objeto.marca,
+            "lugar" to objeto.lugar,
+            "fechaAproximada" to objeto.fechaAproximada,
+            "horaAproximada" to objeto.horaAproximada,
+            "solicitudAsignadaId" to objeto.solicitudAsignadaId,
+            "codigoSolicitudAsignada" to objeto.codigoSolicitudAsignada,
+            "id" to objeto.id,
+            "mes" to mes,
+            "año" to año
+        )
+
         db.collection("objetos")
-            .add(objeto)
+            .add(objetoMap)
             .addOnSuccessListener { docRef ->
-                Log.d("SolicitudViewModel", "Objeto guardado: ${docRef.id}")
+                Log.d("SolicitudViewModel", "Objeto guardado con mes/año: ${docRef.id}")
             }
             .addOnFailureListener { e ->
                 Log.w("SolicitudViewModel", "Error al guardar objeto", e)
             }
     }
+
 
     fun obtenerSolicitudPorId(key: String): Solicitud? {
         Log.d("SolicitudViewModel", "obtenerSolicitudPorId: $key");
@@ -178,39 +203,6 @@ class SolicitudViewModel : ViewModel() {
             }
     }
 
-    fun cargarObjetoDesdeFirestore(id: String) {
-        db.collection("objetos").document(id)
-            .get()
-            .addOnSuccessListener { result ->
-                try {
-                    val estado = safeEstadoObjeto(result.getString("estado") ?: "")
-                    ObjetoEncontrado(
-                        key = result.id,
-                        id = result.getString("id") ?: "",
-                        nombre = result.getString("nombre") ?: "",
-                        fecha = result.getString("fecha") ?: "",
-                        estado = estado,
-                        imagenUri = result.getString("imagenUri"),
-                        descripcion = result.getString("descripcion") ?: "",
-                        categoria = result.getString("categoria") ?: "",
-                        color = result.getString("color") ?: "",
-                        marca = result.getString("marca"),
-                        lugar = result.getString("lugar") ?: "",
-                        fechaAproximada = result.getString("fechaAproximada") ?: "",
-                        horaAproximada = result.getString("horaAproximada") ?: "",
-                        solicitudAsignadaId = result.getString("solicitudAsignadaId"),
-                        codigoSolicitudAsignada = result.getString("codigoSolicitudAsignada")
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-
-            }
-            .addOnFailureListener { e ->
-                Log.w("SolicitudViewModel", "Error al cargar objetos", e)
-            }
-    }
-
     fun cargarSolicitudesDeUsuario(email: String) {
         db.collection("solicitudes")
             .whereEqualTo("propietario", email)
@@ -286,7 +278,14 @@ class SolicitudViewModel : ViewModel() {
             .addOnSuccessListener {
                 Log.d("SolicitudViewModel", "Solicitud aprobada correctamente")
 
-                objetoRef.set(objeto)
+                objetoRef.update(
+                    mapOf(
+                        "estado" to EstadoObjeto.ASIGNADO.name,
+                        "solicitudAsignadaId" to solicitud.key,
+                        "codigoSolicitudAsignada" to solicitud.id
+                    )
+                )
+
                     .addOnSuccessListener {
                         Log.d("SolicitudViewModel", "Objeto vinculado correctamente")
                     }
@@ -314,26 +313,19 @@ class SolicitudViewModel : ViewModel() {
                 if (!objetoKey.isNullOrBlank()) {
                     val objetoRef = db.collection("objetos").document(objetoKey)
 
-                    objetoRef.get().addOnSuccessListener { doc ->
-                        if (doc.exists()) {
-                            val objeto = doc.toObject(ObjetoEncontrado::class.java)
-                            if (objeto != null) {
-                                objeto.estado = EstadoObjeto.DISPONIBLE
-                                objeto.solicitudAsignadaId = null
-                                objeto.codigoSolicitudAsignada = null
-
-                                objetoRef.set(objeto)
-                                    .addOnSuccessListener {
-                                        Log.d("SolicitudViewModel", "Objeto liberado correctamente")
-                                    }
-                                    .addOnFailureListener { e ->
-                                        Log.w("SolicitudViewModel", "Error al liberar objeto", e)
-                                    }
-                            }
+                    objetoRef.update(
+                        mapOf(
+                            "estado" to EstadoObjeto.DISPONIBLE.name,
+                            "solicitudAsignadaId" to null,
+                            "codigoSolicitudAsignada" to null
+                        )
+                    )
+                        .addOnSuccessListener {
+                            Log.d("SolicitudViewModel", "Objeto liberado correctamente")
                         }
-                    }.addOnFailureListener { e ->
-                        Log.w("SolicitudViewModel", "Error al consultar objeto vinculado", e)
-                    }
+                        .addOnFailureListener { e ->
+                            Log.w("SolicitudViewModel", "Error al liberar objeto", e)
+                        }
                 }
             }
             .addOnFailureListener { e ->
@@ -362,7 +354,7 @@ class SolicitudViewModel : ViewModel() {
                                 objeto.estado = EstadoObjeto.ENTREGADO
                                 // No se eliminan los IDs asignados por trazabilidad
 
-                                objetoRef.set(objeto)
+                                objetoRef.update("estado", EstadoObjeto.ENTREGADO.name)
                                     .addOnSuccessListener {
                                         Log.d("SolicitudViewModel", "Objeto marcado como ENTREGADO")
                                     }

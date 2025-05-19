@@ -133,16 +133,26 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
                     EstadisticaKpi("Total registros encontrados", "$total")
 
                     if (estadosCount.isNotEmpty()) {
-                        val pendientes = estadosCount["PENDIENTE"] ?: 0
-                        val aprobadas = estadosCount["APROBADA"] ?: 0
-                        val rechazadas = estadosCount["RECHAZADA"] ?: 0
-                        val entregadas = estadosCount["ENTREGADA"] ?: 0
+                        if (selectedTipo == "solicitudes") {
+                            val pendientes = estadosCount["PENDIENTE"] ?: 0
+                            val aprobadas = estadosCount["APROBADA"] ?: 0
+                            val rechazadas = estadosCount["RECHAZADA"] ?: 0
+                            val entregadas = estadosCount["ENTREGADA"] ?: 0
+                            val canceladas = estadosCount["CANCELADA"] ?: 0
 
-                        EstadisticaKpi("Pendientes / Aprobadas / Rechazadas", "$pendientes / $aprobadas / $rechazadas")
-                        EstadisticaKpi("Entregadas", "$entregadas")
+                            EstadisticaKpi("Pendientes / Aprobadas / Rechazadas", "$pendientes / $aprobadas / $rechazadas")
+                            EstadisticaKpi("Entregadas", "$entregadas")
+                            EstadisticaKpi("Canceladas", "$canceladas")
 
-                        val porcentajeExito = if (total > 0) (aprobadas.toFloat() / total * 100).toInt() else 0
-                        EstadisticaKpi("Porcentaje de éxito", "$porcentajeExito%")
+                            val porcentajeExito = if (total > 0) (aprobadas.toFloat() / total * 100).toInt() else 0
+                            EstadisticaKpi("Porcentaje de éxito", "$porcentajeExito%")
+                        } else if (selectedTipo == "objetos") {
+                            val disponibles = estadosCount["DISPONIBLE"] ?: 0
+                            val asignados = estadosCount["ASIGNADO"] ?: 0
+                            val entregados = estadosCount["ENTREGADO"] ?: 0
+
+                            EstadisticaKpi("Disponibles / Asignados / Entregados", "$disponibles / $asignados / $entregados")
+                        }
 
                         val categoriasCount = snapshot.groupingBy { it.getString("categoria") ?: "Sin categoría" }
                             .eachCount()
@@ -150,7 +160,7 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
                             .sortedByDescending { it.second }
 
                         Spacer(modifier = Modifier.height(24.dp))
-                        Text("Objetos por Categoría", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text("Registros por Categoría", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(12.dp))
 
                         BarChart(data = categoriasCount)
@@ -160,9 +170,6 @@ fun EstadisticasScreen(navController: NavController, viewModel: EstadisticasView
                         Spacer(modifier = Modifier.height(12.dp))
 
                         PieChart(data = categoriasCount)
-
-
-
                     }
 
                 }
