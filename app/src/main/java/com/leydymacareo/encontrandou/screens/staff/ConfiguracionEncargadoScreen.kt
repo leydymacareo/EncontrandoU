@@ -1,7 +1,5 @@
 package com.leydymacareo.encontrandou.screens.staff
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,41 +11,42 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.leydymacareo.encontrandou.NavRoutes
 import com.leydymacareo.encontrandou.R
+import com.leydymacareo.encontrandou.viewmodels.ConfiguracionViewModel
 
 @Composable
 fun ConfiguracionEncargadoScreen(navController: NavController) {
+    val viewModel: ConfiguracionViewModel = viewModel()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    var selectedTab by remember { mutableStateOf("Categoría") }
-    var categorias by remember { mutableStateOf(mutableListOf("Celulares", "Audífonos", "Computadores")) }
-    var lugares by remember { mutableStateOf(mutableListOf("Bloque A", "Biblioteca", "Cafetería")) }
-    var colores by remember { mutableStateOf(mutableListOf("Rojo", "Azul", "Verde")) }
+    var selectedTab by remember { mutableStateOf("Categorias") }
+    val categorias by viewModel.categorias.collectAsState()
+    val lugares by viewModel.lugares.collectAsState()
+    val colores by viewModel.colores.collectAsState()
+
     var editIndex by remember { mutableStateOf<Int?>(null) }
     var editText by remember { mutableStateOf("") }
 
     val contenidoActual = when (selectedTab) {
-        "Categoría" -> categorias
+        "Categorias" -> categorias
         "Lugares" -> lugares
         "Colores" -> colores
         else -> emptyList()
     }
 
     val onAddItem = {
-        editIndex = contenidoActual.size
-        editText = ""
-        when (selectedTab) {
-            "Categoría" -> categorias = categorias.toMutableList().apply { add("") }
-            "Lugares" -> lugares = lugares.toMutableList().apply { add("") }
-            "Colores" -> colores = colores.toMutableList().apply { add("") }
+        if (editText.isNotBlank()) {
+            viewModel.agregarElemento(selectedTab.lowercase(), editText)
+            editText = ""
+            editIndex = null
         }
     }
 
@@ -72,12 +71,13 @@ fun ConfiguracionEncargadoScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    listOf("Categoría", "Lugares", "Colores").forEach { tab ->
+                    listOf("Categorias", "Lugares", "Colores").forEach { tab ->
                         val isSelected = tab == selectedTab
                         Button(
                             onClick = {
                                 selectedTab = tab
                                 editIndex = null
+                                editText = ""
                             },
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -112,7 +112,7 @@ fun ConfiguracionEncargadoScreen(navController: NavController) {
                         if (currentRoute != NavRoutes.EncargadoSolicitudes) navController.navigate(NavRoutes.EncargadoSolicitudes)
                     }
                     EncargadoNavItem("Perfil", R.drawable.person, currentRoute == NavRoutes.EncargadoProfile) {
-                        if (currentRoute != NavRoutes.UserProfile) navController.navigate(NavRoutes.EncargadoProfile)
+                        if (currentRoute != NavRoutes.EncargadoProfile) navController.navigate(NavRoutes.EncargadoProfile)
                     }
                     EncargadoNavItem("Ajustes", R.drawable.settings, currentRoute == NavRoutes.EncargadoAjustes) {
                         if (currentRoute != NavRoutes.EncargadoAjustes) navController.navigate(NavRoutes.EncargadoAjustes)
@@ -131,7 +131,7 @@ fun ConfiguracionEncargadoScreen(navController: NavController) {
 
             Text(
                 text = when (selectedTab) {
-                    "Categoría" -> "Categorías Registradas"
+                    "Categorias" -> "Categorías Registradas"
                     "Lugares" -> "Lugares Registrados"
                     "Colores" -> "Colores Registrados"
                     else -> ""
@@ -159,22 +159,15 @@ fun ConfiguracionEncargadoScreen(navController: NavController) {
                         )
                         IconButton(onClick = {
                             if (editText.isNotBlank()) {
-                                when (selectedTab) {
-                                    "Categoría" -> categorias = categorias.toMutableList().apply { set(index, editText) }
-                                    "Lugares" -> lugares = lugares.toMutableList().apply { set(index, editText) }
-                                    "Colores" -> colores = colores.toMutableList().apply { set(index, editText) }
-                                }
+                                viewModel.editarElemento(selectedTab.lowercase(), item, editText)
                                 editIndex = null
+                                editText = ""
                             }
                         }) {
                             Icon(Icons.Default.Check, contentDescription = "Guardar")
                         }
                         IconButton(onClick = {
-                            when (selectedTab) {
-                                "Categoría" -> categorias = categorias.toMutableList().apply { removeAt(index) }
-                                "Lugares" -> lugares = lugares.toMutableList().apply { removeAt(index) }
-                                "Colores" -> colores = colores.toMutableList().apply { removeAt(index) }
-                            }
+                            viewModel.eliminarElemento(selectedTab.lowercase(), item)
                             editIndex = null
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "Cancelar")
@@ -190,12 +183,7 @@ fun ConfiguracionEncargadoScreen(navController: NavController) {
                             }
                             Spacer(modifier = Modifier.width(4.dp))
                             IconButton(onClick = {
-                                when (selectedTab) {
-                                    "Categoría" -> categorias = categorias.toMutableList().apply { removeAt(index) }
-                                    "Lugares" -> lugares = lugares.toMutableList().apply { removeAt(index) }
-                                    "Colores" -> colores = colores.toMutableList().apply { removeAt(index) }
-                                }
-                                if (editIndex == index) editIndex = null
+                                viewModel.eliminarElemento(selectedTab.lowercase(), item)
                             }) {
                                 Icon(Icons.Default.Delete, contentDescription = "Eliminar")
                             }
@@ -206,13 +194,22 @@ fun ConfiguracionEncargadoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            TextField(
+                value = editText,
+                onValueChange = { editText = it },
+                placeholder = { Text("Nuevo ${selectedTab.lowercase()}") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Button(
                 onClick = onAddItem,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AFF1)),
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text("Añadir ${selectedTab}", color = Color.White)
+                Text("Añadir a ${selectedTab}", color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(90.dp))

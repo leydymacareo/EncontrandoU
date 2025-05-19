@@ -37,6 +37,8 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.core.content.FileProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.leydymacareo.encontrandou.viewmodels.ConfiguracionViewModel
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -47,6 +49,11 @@ fun FormularioObjeto(
     onSubmit: (SolicitudFormState, Uri?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val configViewModel: ConfiguracionViewModel = viewModel()
+    val categorias by configViewModel.categorias.collectAsState()
+    val lugares by configViewModel.lugares.collectAsState()
+    val colores by configViewModel.colores.collectAsState()
+
     val context = LocalContext.current
     var formState by remember { mutableStateOf(SolicitudFormState()) }
     var fechaEnMillis by remember { mutableStateOf<Long?>(null) }
@@ -97,7 +104,7 @@ fun FormularioObjeto(
             formState = formState.copy(nombreObjeto = it)
         }
 
-        LabeledDropdown("Lugar de la pérdida*", listOf("Seleccionar", "Biblioteca", "Cafetería"), formState.lugar) {
+        LabeledDropdown("Lugar de la pérdida*", listOf("Seleccionar") + lugares, formState.lugar) {
             formState = formState.copy(lugar = it)
         }
 
@@ -119,13 +126,13 @@ fun FormularioObjeto(
             }
         }
 
-        LabeledDropdown("Categoría del Objeto*", listOf("Seleccionar", "Bolsos", "Tecnología", "Ropa"), formState.categoria) {
+        LabeledDropdown("Categoría del Objeto*", listOf("Seleccionar") + categorias, formState.categoria) {
             formState = formState.copy(categoria = it)
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(modifier = Modifier.weight(1f)) {
-                LabeledDropdown("Color Principal*", listOf("Seleccionar", "Negro", "Rojo", "Azul"), formState.color) {
+                LabeledDropdown("Color Principal*", listOf("Seleccionar") + colores, formState.color) {
                     formState = formState.copy(color = it)
                 }
             }
