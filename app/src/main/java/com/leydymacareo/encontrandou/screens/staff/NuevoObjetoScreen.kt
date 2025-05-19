@@ -61,8 +61,8 @@ fun NuevoObjetoScreen(
                     color = formData.color,
                     marca = formData.marca,
                     lugar = formData.lugar,
-                    fechaAproximada = formData.fecha,
-                    horaAproximada = formData.hora
+                    fechaAproximada = formData.fechaAproximada,
+                    horaAproximada = formData.horaAproximada
                 )
 
                 viewModel.agregarObjeto(nuevoObjeto)

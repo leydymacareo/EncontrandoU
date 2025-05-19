@@ -142,8 +142,8 @@ fun DetalleSolicitudEncargadoScreen(
                         InfoRow("Fecha de la Solicitud", solicitud.fecha)
                         InfoRow("Nombre del objeto", solicitud.nombreObjeto)
                         InfoRow("Lugar de la pérdida", solicitud.lugar)
-                        InfoRow("Fecha Aproximada", solicitud.fecha)
-                        InfoRow("Hora Aproximada", solicitud.hora)
+                        InfoRow("Fecha Aproximada", solicitud.fechaAproximada)
+                        InfoRow("Hora Aproximada", solicitud.horaAproximada)
                         InfoRow("Categoría", solicitud.categoria)
                         InfoRow(
                             "Marca o Modelo",
@@ -256,7 +256,7 @@ fun DetalleSolicitudEncargadoScreen(
                                 Text("Categoría: ${objeto.categoria}")
                                 Text("Color: ${objeto.color}")
                                 Text("Lugar: ${objeto.lugar}")
-                                Text("Fecha aproximada: ${objeto.fecha}")
+                                Text("Fecha aproximada: ${objeto.fechaAproximada}")
                             }
                         }
                     }
@@ -290,7 +290,7 @@ fun DetalleSolicitudEncargadoScreen(
                                 Text("Categoría: ${objeto.categoria}")
                                 Text("Color: ${objeto.color}")
                                 Text("Lugar: ${objeto.lugar}")
-                                Text("Fecha aproximada: ${objeto.fecha}")
+                                Text("Fecha aproximada: ${objeto.fechaAproximada}")
 
                             }
                         }

@@ -85,8 +85,8 @@ fun FormularioObjeto(
     val camposValidos by derivedStateOf {
         formState.nombreObjeto.isNotBlank() &&
                 formState.lugar.isNotBlank() &&
-                formState.fecha.isNotBlank() &&
-                formState.hora.isNotBlank() &&
+                formState.fechaAproximada.isNotBlank() &&
+                formState.horaAproximada.isNotBlank() &&
                 formState.categoria.isNotBlank() &&
                 formState.color.isNotBlank() &&
                 (!imagenObligatoria || imageUri != null)
@@ -115,13 +115,13 @@ fun FormularioObjeto(
                     selectedDate = fechaEnMillis,
                     onDateSelected = {
                         fechaEnMillis = it
-                        formState = formState.copy(fecha = convertMillisToDate(it))
+                        formState = formState.copy(fechaAproximada = convertMillisToDate(it))
                     }
                 )
             }
             Box(modifier = Modifier.weight(1f)) {
-                LabeledTimePickerField("Hora Aproximada*", formState.hora) {
-                    formState = formState.copy(hora = it)
+                LabeledTimePickerField("Hora Aproximada*", formState.horaAproximada) {
+                    formState = formState.copy(horaAproximada = it)
                 }
             }
         }

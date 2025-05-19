@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.leydymacareo.encontrandou.components.FormularioObjeto
+import com.leydymacareo.encontrandou.components.obtenerFechaActual
 import com.leydymacareo.encontrandou.models.Solicitud
 import com.leydymacareo.encontrandou.viewmodels.SolicitudViewModel
 import com.leydymacareo.encontrandou.viewmodel.SessionState
@@ -70,8 +71,9 @@ fun NuevaSolicitudScreen(
                             id = viewModel.generarCodigoSolicitud(sessionId),
                             nombreObjeto = formData.nombreObjeto,
                             propietario = correoUsuario,
-                            fecha = formData.fecha,
-                            hora = formData.hora,
+                            fecha = obtenerFechaActual(),
+                            fechaAproximada = formData.fechaAproximada,
+                            horaAproximada = formData.horaAproximada,
                             categoria = formData.categoria,
                             color = formData.color,
                             estado = EstadoSolicitud.PENDIENTE,
