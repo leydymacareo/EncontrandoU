@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.leydymacareo.encontrandou.NavRoutes
@@ -32,6 +33,7 @@ fun NuevoObjetoScreen(
 
     val sessionState by sessionViewModel.sessionState.collectAsState()
     val sessionId = (sessionState as? SessionState.LoggedIn)?.sessionId ?: ""
+    val ctx = LocalContext.current;
 
     Scaffold(
         topBar = {
@@ -65,7 +67,7 @@ fun NuevoObjetoScreen(
                     horaAproximada = formData.horaAproximada
                 )
 
-                viewModel.agregarObjeto(nuevoObjeto)
+                viewModel.agregarObjetoConImagen(ctx, nuevoObjeto, imageUri!!)
                 navController.popBackStack()
 
             },

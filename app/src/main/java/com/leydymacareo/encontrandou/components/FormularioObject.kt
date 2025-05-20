@@ -62,7 +62,10 @@ fun FormularioObjeto(
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { imageUri = it } }
+    ) { uri -> uri?.let {
+
+        imageUri = it
+    } }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()

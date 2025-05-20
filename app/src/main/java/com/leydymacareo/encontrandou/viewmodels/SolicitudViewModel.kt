@@ -2,6 +2,8 @@ package com.leydymacareo.encontrandou.viewmodels
 
 import EstadoObjeto
 import EstadoSolicitud
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -27,9 +29,12 @@ class SolicitudViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
 
+    private val storageRepository = StorageRepository()
+
     init {
         Log.d("SolicitudViewModel", "SolicitudViewModel iniciado")
     }
+
 
     fun agregarSolicitud(solicitud: Solicitud) {
         _solicitudes.value = _solicitudes.value + solicitud
@@ -67,6 +72,27 @@ class SolicitudViewModel : ViewModel() {
             }
     }
 
+     fun agregarSolicitudConImagen(context: Context, solicitud: Solicitud, imagenUri: Uri?)
+    {
+        val id = UUID.randomUUID().toString()
+
+        // Subir imagen si existe
+        val urlImagen = if (imagenUri != null) {
+            storageRepository.subirImagen(context, imagenUri, "solicitudes", id,  onSuccess = { url ->
+                Log.d("MyApp", "Upload successful. URL: $url")
+                val solicitudConImagen = solicitud.copy(id = id, imagenUri = url)
+
+                agregarSolicitud(solicitudConImagen)
+            },onError = { error ->
+                Log.e("MyApp", "Upload failed", error)
+
+                agregarSolicitud(solicitud)
+            })
+        } else {
+            agregarSolicitud(solicitud)
+        }
+
+    }
 
     fun agregarObjeto(objeto: ObjetoEncontrado) {
         _objetosEncontrados.value = _objetosEncontrados.value + objeto
@@ -102,6 +128,22 @@ class SolicitudViewModel : ViewModel() {
             .addOnFailureListener { e ->
                 Log.w("SolicitudViewModel", "Error al guardar objeto", e)
             }
+    }
+
+    fun agregarObjetoConImagen(context: Context, objeto: ObjetoEncontrado, imagenUri: Uri) {
+        val id = UUID.randomUUID().toString()
+
+        // Subir imagen a Firebase Storage
+        val urlImagen = storageRepository.subirImagen(context, imagenUri, "objetos", id,onSuccess = { url ->
+            Log.d("MyApp", "Upload successful. URL: $url")
+            val objetoConImagen = objeto.copy(id = id, imagenUri = url)
+
+            agregarObjeto(objetoConImagen)
+        },onError = { error ->
+            Log.e("MyApp", "Upload failed", error)
+
+            agregarObjeto(objeto)
+        })
     }
 
 

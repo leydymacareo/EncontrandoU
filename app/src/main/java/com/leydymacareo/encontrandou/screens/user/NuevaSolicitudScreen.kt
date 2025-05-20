@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -29,6 +30,7 @@ fun NuevaSolicitudScreen(
     sessionViewModel: SessionViewModel = viewModel()
 ) {
     val sessionState by sessionViewModel.sessionState.collectAsState()
+    val ctx = LocalContext.current;
 
     Scaffold(
         topBar = {
@@ -82,7 +84,7 @@ fun NuevaSolicitudScreen(
                             imagenUri = imageUri?.toString()
                         )
 
-                        viewModel.agregarSolicitud(nuevaSolicitud)
+                        viewModel.agregarSolicitudConImagen(ctx, nuevaSolicitud, imageUri)
                         navController.popBackStack()
                     },
                     modifier = Modifier.padding(innerPadding)
