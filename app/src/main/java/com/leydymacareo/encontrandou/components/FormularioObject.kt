@@ -3,6 +3,7 @@ package com.leydymacareo.encontrandou.components
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -58,6 +59,7 @@ fun FormularioObjeto(
     var formState by remember { mutableStateOf(SolicitudFormState()) }
     var fechaEnMillis by remember { mutableStateOf<Long?>(null) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     var showPicker by remember { mutableStateOf(false) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -69,7 +71,13 @@ fun FormularioObjeto(
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
-    ) { success -> if (!success) imageUri = null }
+    ) { success ->
+        Log.i("FormularioObject", "Image taken successfully: $success")
+        if (success) {
+            Log.i("FormularioObject", "Swap imageUri")
+            imageUri = tempImageUri
+        }
+    }
 
     fun launchCamera() {
         val file = File(
@@ -81,7 +89,8 @@ fun FormularioObjeto(
             "com.leydymacareo.encontrandou.fileprovider",
             file
         )
-        imageUri = uri
+        tempImageUri = uri
+        Log.d("FormularioObject", "LaunchCamera with Uri: $uri");
         cameraLauncher.launch(uri)
     }
 
@@ -168,6 +177,7 @@ fun FormularioObjeto(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Adjuntar Foto", color = Color.Gray)
         }
+
 
         if (imageUri != null) {
             Image(
