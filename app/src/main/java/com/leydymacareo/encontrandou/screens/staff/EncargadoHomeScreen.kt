@@ -82,14 +82,7 @@ fun EncargadoHomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.filterlist),
-                            contentDescription = "Filtros"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Filtros")
-                    }
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable {

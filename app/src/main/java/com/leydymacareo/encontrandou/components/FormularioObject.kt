@@ -1,12 +1,12 @@
+// Composable principal que representa el formulario para reportar un objeto perdidon o registar un objeto encontrado
+
 package com.leydymacareo.encontrandou.components
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -33,7 +32,6 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
 import com.leydymacareo.encontrandou.R
 import com.leydymacareo.encontrandou.models.SolicitudFormState
-import com.leydymacareo.encontrandou.screens.user.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,10 +48,13 @@ fun FormularioObjeto(
     onSubmit: (SolicitudFormState, Uri?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    // ViewModel para obtener listas dinámicas de categorías, lugares y colores
     val configViewModel: ConfiguracionViewModel = viewModel()
     val categorias by configViewModel.categorias.collectAsState()
     val lugares by configViewModel.lugares.collectAsState()
     val colores by configViewModel.colores.collectAsState()
+
 
     val context = LocalContext.current
     var formState by remember { mutableStateOf(SolicitudFormState()) }
@@ -62,13 +63,14 @@ fun FormularioObjeto(
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     var showPicker by remember { mutableStateOf(false) }
 
+    // Seleccionar foto de la galeria
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> uri?.let {
-
         imageUri = it
     } }
 
+    // Lanzador para tomar foto con la cámara
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
@@ -79,6 +81,7 @@ fun FormularioObjeto(
         }
     }
 
+    // Función para lanzar la cámara y guardar la imagen temporal
     fun launchCamera() {
         val file = File(
             context.cacheDir,
@@ -104,6 +107,7 @@ fun FormularioObjeto(
                 (!imagenObligatoria || imageUri != null)
     }
 
+    // Campos del formulario
     Column(
         modifier = modifier
             .padding(horizontal = 20.dp)
@@ -482,7 +486,7 @@ fun LabeledTimePickerField(
     }
 
     if (showDialog) {
-        DialWithDialogExample(
+        crearTimePicker(
             onConfirm = { timeState ->
                 val formatted = "%02d:%02d".format(timeState.hour, timeState.minute)
                 onTimeSelected(formatted)
@@ -497,7 +501,7 @@ fun LabeledTimePickerField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DialWithDialogExample(
+fun crearTimePicker(
     onConfirm: (TimePickerState) -> Unit,
     onDismiss: () -> Unit,
 ) {

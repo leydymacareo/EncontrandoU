@@ -196,7 +196,7 @@ fun DetalleSolicitudEncargadoScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // ✅ Botón para entregar si ya está aprobada
+                // Botón para entregar si ya está aprobada
                 if (puedeEntregar) {
                     Button(
                         onClick = { showConfirmEntrega = true },

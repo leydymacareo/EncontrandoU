@@ -48,8 +48,8 @@ fun SolicitudDetailScreen(
             Surface {
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .background(Color.White)
+                        .fillMaxWidth()
                         .padding(top = 40.dp, bottom = 20.dp, start = 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -72,6 +72,8 @@ fun SolicitudDetailScreen(
         content = { innerPadding ->
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
                     .padding(innerPadding)
                     .padding(20.dp)
                     .verticalScroll(rememberScrollState()),

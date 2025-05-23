@@ -5,6 +5,7 @@ import EstadoSolicitud
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.leydymacareo.encontrandou.models.ObjetoEncontrado
@@ -17,7 +18,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class SolicitudViewModel : ViewModel() {
-
     private val _solicitudes = MutableStateFlow<List<Solicitud>>(emptyList())
     val solicitudes: StateFlow<List<Solicitud>> = _solicitudes
 
@@ -58,8 +58,8 @@ class SolicitudViewModel : ViewModel() {
             "id" to solicitud.id,
             "sessionId" to solicitud.sessionId,
             "codigoObjetoAsignado" to solicitud.codigoObjetoAsignado,
-            "mes" to mes,   // ✅ nuevo campo
-            "año" to año    // ✅ nuevo campo
+            "mes" to mes,
+            "año" to año
         )
 
         db.collection("solicitudes")
@@ -77,10 +77,10 @@ class SolicitudViewModel : ViewModel() {
         val id = UUID.randomUUID().toString()
 
         // Subir imagen si existe
-        val urlImagen = if (imagenUri != null) {
+       if (imagenUri != null) {
             storageRepository.subirImagen(context, imagenUri, "solicitudes", id,  onSuccess = { url ->
                 Log.d("MyApp", "Upload successful. URL: $url")
-                val solicitudConImagen = solicitud.copy(id = id, imagenUri = url)
+                val solicitudConImagen = solicitud.copy(imagenUri = url)
 
                 agregarSolicitud(solicitudConImagen)
             },onError = { error ->
@@ -91,7 +91,6 @@ class SolicitudViewModel : ViewModel() {
         } else {
             agregarSolicitud(solicitud)
         }
-
     }
 
     fun agregarObjeto(objeto: ObjetoEncontrado) {
@@ -136,7 +135,7 @@ class SolicitudViewModel : ViewModel() {
         // Subir imagen a Firebase Storage
         val urlImagen = storageRepository.subirImagen(context, imagenUri, "objetos", id,onSuccess = { url ->
             Log.d("MyApp", "Upload successful. URL: $url")
-            val objetoConImagen = objeto.copy(id = id, imagenUri = url)
+            val objetoConImagen = objeto.copy(imagenUri = url)
 
             agregarObjeto(objetoConImagen)
         },onError = { error ->
@@ -145,7 +144,6 @@ class SolicitudViewModel : ViewModel() {
             agregarObjeto(objeto)
         })
     }
-
 
     fun obtenerSolicitudPorId(key: String): Solicitud? {
         Log.d("SolicitudViewModel", "obtenerSolicitudPorId: $key");
@@ -282,7 +280,7 @@ class SolicitudViewModel : ViewModel() {
             }
     }
 
-    // ✅ FUNCIONES DE ENUM SEGURO
+    // FUNCIONES DE ENUM SEGURO
     private fun safeEstadoSolicitud(value: String): EstadoSolicitud =
         try {
             EstadoSolicitud.valueOf(value)
@@ -297,7 +295,7 @@ class SolicitudViewModel : ViewModel() {
             EstadoObjeto.DISPONIBLE
         }
 
-    // ✅ NUEVO: aprobar solicitud y vincular objeto
+    // NUEVO: aprobar solicitud y vincular objeto
     fun aprobarSolicitudYVincularObjeto(solicitud: Solicitud, objeto: ObjetoEncontrado) {
         val solicitudRef = db.collection("solicitudes").document(solicitud.key)
         val objetoRef = db.collection("objetos").document(objeto.key)
@@ -481,7 +479,4 @@ class SolicitudViewModel : ViewModel() {
         // Categoría ya fue filtrada antes
         return puntaje
     }
-
-
-
 }

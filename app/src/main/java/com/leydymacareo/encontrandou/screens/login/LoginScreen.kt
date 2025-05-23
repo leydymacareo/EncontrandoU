@@ -37,8 +37,8 @@ fun LoginScreen(
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
 
-    var email by remember { mutableStateOf("lmacareo@unab.edu.co") }
-    var password by remember { mutableStateOf("1234567L") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }

@@ -56,18 +56,6 @@ fun SolicitudesEncargadoScreen(
                         .fillMaxWidth()
                         .padding(top = 40.dp, bottom = 20.dp),
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.filterlist),
-                        contentDescription = "Filtros"
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Filtros")
-                }
             }
         },
         bottomBar = {
@@ -102,8 +90,8 @@ fun SolicitudesEncargadoScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
                 .background(Color(0xFFF5F5F5))
+                .padding(innerPadding)
                 .padding(horizontal = 20.dp)
                 .verticalScroll(rememberScrollState())
         ) {

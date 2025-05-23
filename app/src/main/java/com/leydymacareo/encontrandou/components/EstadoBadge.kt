@@ -1,3 +1,5 @@
+// Esta funcion muestra una "etiqueta de estado" con color, texto e ícono
+
 package com.leydymacareo.encontrandou.components
 
 import androidx.compose.foundation.background
@@ -11,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+
 
 @Composable
 fun EstadoBadge(estado: String) {

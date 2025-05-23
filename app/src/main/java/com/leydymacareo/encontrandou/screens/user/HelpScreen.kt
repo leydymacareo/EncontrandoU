@@ -104,30 +104,43 @@ fun HelpScreen(navController: NavController) {
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Column {
+                Text(
+                    text = "Reporta y recupera tus objetos",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                VideoIntroScreen()
+            }
             HelpCard(title = "¿Cómo funciona esta app?", content = listOf(
-                "Reporta el objeto que perdiste desde la pantalla principal.",
-                "El encargado del departamento revisará tu solicitud.",
-                "Si encuentran tu objeto, te enviarán una notificación.",
-                "Podrás pasar a recogerlo en la oficina de objetos perdidos."
+                "Reporta el objeto que perdiste desde la pantalla principal.\n",
+                "El encargado del departamento revisará tu solicitud.\n",
+                "Si encuentran tu objeto, te enviarán una notificación.\n",
+                "Podrás pasar a recogerlo en la oficina de objetos perdidos.\n"
             ))
 
-            HelpCard(title = "Preguntas frecuentes", content = listOf(
-                "¿Qué tipo de objetos puedo reportar?",
-                "¿Cuánto tiempo dura mi solicitud?",
-                "¿Puedo modificar una solicitud después de enviarla?",
-                "¿Dónde recojo mi objeto si lo aprueban?"
-            ))
+
+            HelpCard(
+                title = "Preguntas frecuentes",
+                content = listOf(
+                    "¿Qué tipo de objetos puedo reportar?\n  \nPuedes reportar mochilas, libretas, ropa, tecnología, llaves y objetos personales.\n",
+                    "¿Cuánto tiempo dura mi solicitud?\n  \nTu solicitud será respondida en un máximo de 15 días      hábiles.\n",
+                    "¿Puedo modificar una solicitud después de enviarla?\n \nNo, por ahora las solicitudes no pueden modificarse. Si cometiste un error, puedes enviar una nueva.\n",
+                    "¿Dónde recojo mi objeto si lo aprueban?\n   \nEn la oficina de objetos perdidos ubicada en el Edificio B,      Piso 2."
+                )
+            )
 
             HelpCard(title = "Contacto", content = listOf(
                 "Correo: objetosperdidos@unab.edu.co",
                 "Teléfono: +57 300 123 4567",
-                "Oficina: Edificio X, Piso 2"
+                "Oficina: Edificio 2, Piso 2"
             ))
 
             HelpCard(title = "Versión", content = listOf(
                 "App: EncontradoU",
                 "Versión: v1.0.0",
-                "Última actualización: abril 2025"
+                "Última actualización: Mayo 2025"
             ))
 
             Spacer(modifier = Modifier.height(90.dp))
